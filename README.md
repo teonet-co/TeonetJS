@@ -9,3 +9,9 @@ bower install teonet
 ```
 npm install teonet
 ```
+
+## Notes
+
+Use before build this package:
+
+    sudo apt-get install build-essential
