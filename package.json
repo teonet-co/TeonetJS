@@ -17,6 +17,13 @@
     "teonet",
     "network"
   ],
+  "dependencies": {
+    "ffi": "^2.0.0",
+    "ref": "^1.3.2",
+    "ref-array": "^1.1.2",
+    "ref-struct": "^1.0.2"
+  },
   "author": "Kirill Scherba <kirill@scherba.ru> (http://gitlab.ksproject.org/)",
+  "contributors": [],
   "license": "MIT"
 }
