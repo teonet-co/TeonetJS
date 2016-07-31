@@ -1,6 +1,6 @@
 {
   "name": "teonet",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Javascript (or NodeJS) Teonet server Module",
   "main": "teobet.js",
   "directories": {
