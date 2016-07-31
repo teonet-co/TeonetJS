@@ -1,0 +1,24 @@
+{
+  "name": "teonet",
+  "description": "Javascript (or NodeJS) Teonet server Module",
+  "main": "teonet.js",
+  "authors": [
+    "Kirill Scherba <kirill@scherba.ru> (http://gitlab.ksproject.org/)"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "teonet",
+    "network"
+  ],
+  "moduleType": [
+    "globals"
+  ],
+  "homepage": "https://gitlab.ksproject.org/teonet/TeonetJS",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
