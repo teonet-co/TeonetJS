@@ -1,13 +1,14 @@
 {
   "name": "teonet",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Javascript (or NodeJS) Teonet server Module",
-  "main": "teobet.js",
+  "main": "teonet.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "publish": "npm publish"
   },
   "repository": {
     "type": "git",
@@ -18,10 +19,10 @@
     "network"
   ],
   "dependencies": {
-    "ffi": "^2.0.0",
+    "ffi": "^2.1.0",
     "ref": "^1.3.2",
     "ref-array": "^1.1.2",
-    "ref-struct": "^1.0.2"
+    "ref-struct": "^1.1.0"
   },
   "author": "Kirill Scherba <kirill@scherba.ru> (http://gitlab.ksproject.org/)",
   "contributors": [],
