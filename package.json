@@ -1,14 +1,13 @@
 {
   "name": "teonet",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "description": "Teonet server nodejs module",
   "main": "teonet.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "publish": "npm publish"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
