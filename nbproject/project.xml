@@ -5,5 +5,9 @@
         <data xmlns="http://www.netbeans.org/ns/clientside-project/1">
             <name>TeonetJS</name>
         </data>
+        <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>nodejs</word>
+            <word>teonet</word>
+        </spellchecker-wordlist>
     </configuration>
 </project>

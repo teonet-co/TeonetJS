@@ -1,4 +1,4 @@
-# Teonet javascript server Module
+# Teonet server nodejs module [![NPM version][npm-image]][npm-url]
 
 ## Install with bower:  
 ```

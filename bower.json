@@ -1,6 +1,6 @@
 {
   "name": "teonet",
-  "description": "Javascript (or NodeJS) Teonet server Module",
+  "description": "Teonet server nodejs module",
   "main": "teonet.js",
   "authors": [
     "Kirill Scherba <kirill@scherba.ru> (http://gitlab.ksproject.org/)"
