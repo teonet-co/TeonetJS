@@ -90,16 +90,18 @@ var ksnet_cfg = StructType({
     ke: 'pointer'       ///< Poiner to ksnetEventManager
 //
 //    // Flags
-//    int show_connect_f,    ///< Show connection message
-//        show_debug_f,     ///< Show debug messages
-//        show_debug_vv_f, ///< Show debug vv messages
-//        show_peers_f,   ///< Show peers at start up
-//        hot_keys_f,    ///< Show hotkeys when press h
-//        crypt_f,      ///< Encrypt/Decrypt packets
-//        vpn_connect_f,  ///< Start VPN flag
-//        show_tr_udp_f, ///< Show TR-UDP statistic at start up   
-//        sig_segv_f; ///< SIGSEGV processing
-//    
+//    show_connect_f: 'int',    ///< Show connection message
+//    show_debug_f: 'int',     ///< Show debug messages
+//    show_debug_vv_f: 'int', ///< Show debug vv messages
+//    show_debug_vvv_f: 'int', ///< Show debug vvv messages
+//    show_peers_f: 'int',   ///< Show peers at start up
+//    hot_keys_f: 'int',    ///< Show hotkeys when press h
+//    crypt_f: 'int',      ///< Encrypt/Decrypt packets
+//    vpn_connect_f: 'int',  ///< Start VPN flag
+//    show_tr_udp_f: 'int', ///< Show TR-UDP statistic at start up   
+//    sig_segv_f: 'int', ///< SIGSEGV processing
+//    block_cli_input_f: 'int' ///< Block teonet CLI input (for using in GUI application)
+//
 //    // Daemon mode flags
 //    int dflag,  ///< Start application in Daemon mode
 //        kflag;  ///< Kill application in Daemon mode
@@ -339,6 +341,19 @@ module.exports = {
          */
         EV_K_USER: 11
     },
+    
+    /**
+     * Teonet ksnetEvMgrOpts enum 
+     */
+    opts: {
+        
+        READ_OPTIONS: 0x01, ///! Read options at init
+        READ_CONFIGURATION: 0x02,  ///! Read configuration files at init
+        READ_ALL: 0x03, ///! Read options and configuration files = READ_OPTIONS|READ_CONFIGURATION,
+        APP_PARAM: 0x04, ///! Process aditional applications parameters
+        BLOCK_CLI_INPUT: 0x08 ///! Block CLI input
+        
+    },
 
     /**
      * The "ksnCorePacketData" struct type
@@ -462,7 +477,7 @@ module.exports = {
 
         'syslog': ['void', ['int', 'string']]
     }),
-
+    
     /**
      * Get teonet library version
      *

@@ -1,6 +1,6 @@
 {
   "name": "teonet",
-  "version": "0.0.6",
+  "version": "0.0.10",
   "description": "Teonet server nodejs module",
   "main": "teonet.js",
   "directories": {
