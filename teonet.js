@@ -405,6 +405,13 @@ module.exports = {
          * @return {'int'} Alway return 0
          */
         'ksnetEvMgrRun': ['int', ['pointer']],
+        
+        /**
+	 * Stop event manager
+	 * 
+	 * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+	 */
+	'ksnetEvMgrStop': ['void', ['pointer']],
 
         /**
          * Set custom timer interval. The event EV_K_TIMER will be send after
@@ -663,6 +670,16 @@ module.exports = {
         });
     },
 
+    /**
+     * Stop teonet processing 
+     * 
+     * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+     * @returns {undefined}
+     */
+    stop: function (ke) {
+
+        if(ke !== null) this.lib.ksnetEvMgrStop(ke);
+    },    
 
     /**
      * Initialize and start Teonet
