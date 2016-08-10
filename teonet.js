@@ -339,7 +339,26 @@ module.exports = {
         /**
          * User press A hotkey
          */
-        EV_K_USER: 11
+        EV_K_USER: 11,
+        
+        // \todo Fill next events
+        
+        /**
+         * #27 Angular interval event happened
+         * 
+         * This event sends by Angular Teonet Service running in Teonet Node 
+         * Application when Angular interval tick happened
+         * 
+         * Parameters of Teonet Events callback function:
+         * 
+         * @param ke Pointer to ksnetEvMgrClass
+         * @param event This event
+         * @param data NULL
+         * @param data_len 0
+         * @param user_data NULL
+         */
+        EV_A_INTERVAL: 27
+
     },
     
     /**
