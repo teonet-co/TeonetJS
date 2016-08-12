@@ -501,7 +501,17 @@ module.exports = {
          */
         'ksnLNullSendToL0': ['int', ['pointer', 'string', 'int', 'string', 'size_t', 'uint8', 'string', 'size_t']],
 
-        'syslog': ['void', ['int', 'string']]
+        'syslog': ['void', ['int', 'string']],
+        
+        /**
+         * Get this host name
+         *
+         * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+         *
+         * @return {'string'} Return this host name
+         */
+        'ksnetEvMgrGetHostName': ['string', ['pointer']]
+
     }),
     
     /**
@@ -511,6 +521,16 @@ module.exports = {
      */
     version: function () {
         return this.lib.teoGetLibteonetVersion();
+    },
+
+    /**
+     * 
+     * 
+     * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+     * @returns {'string'} This host name
+     */
+    host: function (ke) {
+        return this.lib.ksnetEvMgrGetHostName(ke);
     },
 
     /**
