@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2016 Kirill Scherba <kirill@scherba.ru>.
@@ -53,7 +53,7 @@ var ksnCorePacketData = StructType({
 
     arp: 'pointer', /* ksnet_arp_data * */    ///< @param {'pointer'} arp Pointer to ARP Table data
 
-    l0_f: 'int'                     ///< @param {'int'} l0_f L0 command flag (from set to l0 client name)  
+    l0_f: 'int'                     ///< @param {'int'} l0_f L0 command flag (from set to l0 client name)
 });
 var ksnCorePacketDataPtr = ref.refType(ksnCorePacketData);
 
@@ -98,7 +98,7 @@ var ksnet_cfg = StructType({
 //    hot_keys_f: 'int',    ///< Show hotkeys when press h
 //    crypt_f: 'int',      ///< Encrypt/Decrypt packets
 //    vpn_connect_f: 'int',  ///< Start VPN flag
-//    show_tr_udp_f: 'int', ///< Show TR-UDP statistic at start up   
+//    show_tr_udp_f: 'int', ///< Show TR-UDP statistic at start up
 //    sig_segv_f: 'int', ///< SIGSEGV processing
 //    block_cli_input_f: 'int' ///< Block teonet CLI input (for using in GUI application)
 //
@@ -114,20 +114,20 @@ var ksnet_cfg = StructType({
 //    char app_prompt[KSN_BUFFER_SM_SIZE/2];      ///< Application prompt
 //    char app_name[KSN_BUFFER_SM_SIZE/2];        ///< Application name
 //    char app_description[KSN_BUFFER_SM_SIZE/2]; ///< Application description
-//    
+//
 //    // Application parameters
-//    int app_argc; ///< Number of requered application parameters    
+//    int app_argc; ///< Number of requered application parameters
 //    char **app_argv; ///< Array of application parameters
 //
 //    // Host name & port
 //    long port;                              ///< This host port number
 //    int  port_inc_f;                        ///< Increment host port if busy
 //    char host_name[KSN_MAX_HOST_NAME];      ///< This host name
-//    
+//
 //    // TCP Proxy
 //    int  tcp_allow_f;       ///< Allow TCP Proxy connections to this host
 //    long tcp_port;          ///< TCP Proxy port number
-//    
+//
 //    // L0 Server
 //    int  l0_allow_f;                             ///< Allow L0 Server and l0 client connections to this host
 //    char l0_tcp_ip_remote[KSN_BUFFER_SM_SIZE/2]; ///< L0 Server remote IP address (send clients to connect to server)
@@ -137,7 +137,7 @@ var ksnet_cfg = StructType({
 //    char r_host_addr[KSN_BUFFER_SM_SIZE/2]; ///< Remote host internet address
 //    long r_port;                            ///< Remote host port
 //    long r_tcp_port;                        ///< Remote host tcp port
-//    int r_tcp_f;            ///< Connect to TCP Proxy R-Host  
+//    int r_tcp_f;            ///< Connect to TCP Proxy R-Host
 //
 //    // VPN
 //    char vpn_dev_name[KSN_MAX_HOST_NAME];   ///< VPN Interface device name
@@ -145,14 +145,14 @@ var ksnet_cfg = StructType({
 //    char vpn_ip[KSN_BUFFER_SM_SIZE/2];      ///< VPN Interface IP
 //    long vpn_ip_net;                        ///< VPN Interface network mask
 //    long vpn_mtu;                           ///< VPN Interface MTU
-//    
+//
 //    // Terminal
 ////    char t_username[KSN_BUFFER_SM_SIZE/2]; ///< User name to login to terminal
 ////    char t_password[KSN_BUFFER_SM_SIZE/2]; ///< Password to login to terminal
-//    
+//
 //    // Syslog options
-//    long log_priority;                       ///< Syslog priority 
-//    
+//    long log_priority;                       ///< Syslog priority
+//
 //    // Helpers
 //    int pp;
 //    char pn[KSN_BUFFER_SM_SIZE];
@@ -217,14 +217,14 @@ var ksnetEvMgrClass = StructType({
 //    ev_signal sigkill_w; ///< Signal SIGKILL watcher
 //    ev_signal sigstop_w; ///< Signal SIGSTOP watcher
 //    #endif
-//    
+//
 //    void *user_data; ///< Pointer to user data or NULL if absent
-//    
+//
 //    struct cli_def *cli;
-//    
+//
 //    int argc;         ///< Applications argc
-//    char** argv;      ///< Applications argv  
-//    
+//    char** argv;      ///< Applications argv
+//
 //    char *type;         ///< Application type
 
 });
@@ -245,12 +245,12 @@ module.exports = {
 
         /*
          * Default event description example:
-         * 
+         *
          * Description:
          * #0 Calls immediately after event manager starts
-         * 
+         *
          * Parameters definition:
-         * 
+         *
          * @param {'pointer'} ke Pointer to ksnetEvMgrClass
          * @param {int} ev This event
          * @param {'pointer'} data Pointer to data, usually Pointer to ksnCorePacketData
@@ -340,17 +340,17 @@ module.exports = {
          * User press A hotkey
          */
         EV_K_USER: 11,
-        
+
         // \todo Fill next events
-        
+
         /**
          * #27 Angular interval event happened
-         * 
-         * This event sends by Angular Teonet Service running in Teonet Node 
+         *
+         * This event sends by Angular Teonet Service running in Teonet Node
          * Application when Angular interval tick happened
-         * 
+         *
          * Parameters of Teonet Events callback function:
-         * 
+         *
          * @param ke Pointer to ksnetEvMgrClass
          * @param event This event
          * @param data NULL
@@ -360,18 +360,18 @@ module.exports = {
         EV_A_INTERVAL: 27
 
     },
-    
+
     /**
-     * Teonet ksnetEvMgrOpts enum 
+     * Teonet ksnetEvMgrOpts enum
      */
     opts: {
-        
+
         READ_OPTIONS: 0x01, ///! Read options at init
         READ_CONFIGURATION: 0x02,  ///! Read configuration files at init
         READ_ALL: 0x03, ///! Read options and configuration files = READ_OPTIONS|READ_CONFIGURATION,
         APP_PARAM: 0x04, ///! Process aditional applications parameters
         BLOCK_CLI_INPUT: 0x08 ///! Block CLI input
-        
+
     },
 
     /**
@@ -424,10 +424,10 @@ module.exports = {
          * @return {'int'} Alway return 0
          */
         'ksnetEvMgrRun': ['int', ['pointer']],
-        
+
         /**
 	 * Stop event manager
-	 * 
+	 *
 	 * @param {'pointer'} ke Pointer to ksnetEvMgrClass
 	 */
 	'ksnetEvMgrStop': ['void', ['pointer']],
@@ -484,7 +484,7 @@ module.exports = {
         // int ksnCommandSendCmdEcho(ksnCommandClass *kco, char *to, void *data,
         //                    size_t data_len)
         'ksnCommandSendCmdEcho': ['int', ['pointer', 'string', 'string', 'size_t']],
-        
+
         /**
          * Send data to L0 client. Usually it is an answer to request from L0 client
          *
@@ -502,7 +502,7 @@ module.exports = {
         'ksnLNullSendToL0': ['int', ['pointer', 'string', 'int', 'string', 'size_t', 'uint8', 'string', 'size_t']],
 
         'syslog': ['void', ['int', 'string']],
-        
+
         /**
          * Get this host name
          *
@@ -510,10 +510,27 @@ module.exports = {
          *
          * @return {'string'} Return this host name
          */
-        'ksnetEvMgrGetHostName': ['string', ['pointer']]
+        'ksnetEvMgrGetHostName': ['string', ['pointer']],
 
+        /**
+         * Get application version
+         *
+         * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+         *
+         * @return {'string'} Return application version
+         */
+        'teoGetAppVersion': ['string', ['pointer']],
+        
+        /**
+         * Get application type
+         *
+         * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+         *
+         * @return {'string'} Return application type
+         */
+        'teoGetAppType': ['string', ['pointer']]
     }),
-    
+
     /**
      * Get teonet library version
      *
@@ -524,8 +541,8 @@ module.exports = {
     },
 
     /**
-     * 
-     * 
+     * Get this host name
+     *
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
      * @returns {'string'} This host name
      */
@@ -554,6 +571,26 @@ module.exports = {
     },
 
     /**
+     * Get application version
+     *
+     * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+     * @returns {'string'} This application version
+     */
+    getAppVersion: function (ke) {
+        return this.lib.teoGetAppVersion(ke);
+    },
+
+    /**
+     * Get application version
+     *
+     * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+     * @returns {'string'} This application version
+     */
+    getAppType: function (ke) {
+        return this.lib.teoGetAppType(ke);
+    },
+
+    /**
      * Set custom timer interval. The event EV_K_TIMER will be send after
      * every time_interval period.
      *
@@ -577,7 +614,7 @@ module.exports = {
     sendCmdAnswerTo: function (ke, rd, cmd, out_data) {
 
         var retavl;
-        
+
         if (rd.l0_f) {
             retavl = this.lib.ksnLNullSendToL0(ke.ksn_cfg.ke, rd.addr, rd.port, rd.from, rd.from_len, cmd, out_data, getLength(out_data));
         }
@@ -587,17 +624,17 @@ module.exports = {
 
         return retavl;
     },
-    
+
     /**
      * Clone an object
-     * 
+     *
      * @param {type} obj
      * @returns {unresolved}
      */
     cloneObject: function(obj) {
         return JSON.parse(JSON.stringify(obj));
         //return Object.assign({}, obj);
-    }, 
+    },
 
     /**
      * Send command to peer
@@ -613,10 +650,10 @@ module.exports = {
 
         return this.lib.ksnCoreSendCmdto(ke.kc, peer_name, cmd, data, getLength(data));
     },
-    
+
     /**
      * Send command to L0 client
-     * 
+     *
      * @param {'pointer'} ke
      * @param {'string'} addr
      * @param {'int'} port
@@ -626,10 +663,10 @@ module.exports = {
      * @returns {'int'}
      */
     sendCmdToClient: function(ke, addr, port, peer_name, cmd, data) {
-        
+
         return this.lib.ksnLNullSendToL0(ke, addr, port, peer_name, peer_name.length, cmd, data, getLength(data));
     },
-    
+
     /**
      * Send Echo command to peer name
      *
@@ -710,15 +747,15 @@ module.exports = {
     },
 
     /**
-     * Stop teonet processing 
-     * 
+     * Stop teonet processing
+     *
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
      * @returns {undefined}
      */
     stop: function (ke) {
 
         if(ke !== null) this.lib.ksnetEvMgrStop(ke);
-    },    
+    },
 
     /**
      * Initialize and start Teonet
@@ -746,7 +783,7 @@ module.exports = {
         this.run(ke, ffiAsyncCb);
     },
 
-    
+
     /**
      * Get object for logging to syslog
      *
