@@ -468,7 +468,7 @@ module.exports = {
          * Send command by name to peer
          *
          * @param {'pointer'} kc Pointer to ksnCoreClass
-         * @param {'pointer'} to Peer name to send to
+         * @param {'string'} to Peer name to send to
          * @param {'uint8'} cmd Command number
          * @param {'pointer'} data Commands data
          * @param {'size_t'} data_len Commands data length
@@ -640,7 +640,7 @@ module.exports = {
      * Send command to peer
      *
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
-     * @param {'pointer'} peer_name Peer name to send to
+     * @param {'string'} peer_name Peer name to send to
      * @param {'uint8'} cmd Command number
      * @param {'pointer'} data Commands data
      *
