@@ -230,6 +230,28 @@ var ksnetEvMgrClass = StructType({
 });
 var ksnetEvMgrClassPtr = ref.refType(ksnetEvMgrClass);
 
+//ksnet_arp_data
+var ksnetArpData = StructType({
+
+    mode: 'int16',                      ///< Peers mode: -1 - This host, -2 undefined host, 0 - peer , 1 - r-host, 2 - TCP Proxy peer
+    //char addr[ARP_TABLE_IP_SIZE];       ///< Peer IP address
+    addr: ArrayType('char', 48),        ///< Peer IP address
+    port: 'int16',                      ///< Peer port
+
+    last_activity: 'double',            ///< Last time receved data from peer
+    last_triptime_send: 'double',       ///< Last time when triptime request send
+    last_triptime_got: 'double',        ///< Last time when triptime received
+
+    last_triptime: 'double',            ///< Last triptime
+    triptime: 'double',                 ///< Middle triptime
+
+    monitor_time: 'double',             ///< Monitor ping time
+
+    connected_time: 'double'            ///< Time when peer was connected to this peer
+
+});
+var ksnetArpDataPtr = ref.refType(ksnetArpData);
+
 function getLength(data) {
     return data ? data.length : 0;
 }
@@ -405,6 +427,11 @@ module.exports = {
      */
     'ksnCoreClass': ksnCoreClass,
     //'ksnCoreClassPtr': ksnCoreClassPtr,
+    
+    /**
+     * "The "ksnetArpData" struct type
+     */
+    'arpData': ksnetArpData,
 
     lib: ffi.Library('libteonet', {
 
@@ -520,7 +547,7 @@ module.exports = {
          * @return {'string'} Return application version
          */
         'teoGetAppVersion': ['string', ['pointer']],
-        
+
         /**
          * Get application type
          *
@@ -528,7 +555,10 @@ module.exports = {
          *
          * @return {'string'} Return application type
          */
-        'teoGetAppType': ['string', ['pointer']]
+        'teoGetAppType': ['string', ['pointer']],
+
+        //ksnet_arp_data *ksnetArpGet(ksnetArpClass *ka, char *name);
+        'ksnetArpGet': [ksnetArpDataPtr, ['pointer', 'string']]
     }),
 
     /**
@@ -589,6 +619,16 @@ module.exports = {
     getAppType: function (ke) {
         return this.lib.teoGetAppType(ke);
     },
+    
+    /**
+     * 
+     * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+     * @param {'string'}  peer_name Peer name to get ARP record for
+     * @returns {ksnetArpDataPtr} Pointer to ksnetArpData (ksnet_arp_data) or null if "peer_name" peer is absent
+     */
+    getArp: function (ke, peer_name) {
+        return this.lib.ksnetArpGet(ksnCoreClass(ke.kc).ka, peer_name);
+    },
 
     /**
      * Set custom timer interval. The event EV_K_TIMER will be send after
@@ -644,7 +684,7 @@ module.exports = {
      * @param {'uint8'} cmd Command number
      * @param {'pointer'} data Commands data
      *
-     * @return {'pointer'} Pointer to ksnet_arp_data or null if "to" peer is absent
+     * @return {'pointer'} Pointer to ksnetArpData (ksnet_arp_data) or null if "to" peer is absent
      */
     sendCmdTo: function (ke, peer_name, cmd, data) {
 
@@ -660,6 +700,7 @@ module.exports = {
      * @param {'string'} peer_name
      * @param {'uint8'} cmd
      * @param {'pointer'} data
+     * 
      * @returns {'int'}
      */
     sendCmdToClient: function(ke, addr, port, peer_name, cmd, data) {
