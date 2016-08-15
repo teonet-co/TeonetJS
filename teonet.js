@@ -238,16 +238,16 @@ var ksnetArpData = StructType({
     addr: ArrayType('char', 48),        ///< Peer IP address
     port: 'int16',                      ///< Peer port
 
-    last_activity: 'double',            ///< Last time receved data from peer
-    last_triptime_send: 'double',       ///< Last time when triptime request send
-    last_triptime_got: 'double',        ///< Last time when triptime received
+    lastActivity: 'double',             ///< Last time receved data from peer
+    lastTriptimeSend: 'double',         ///< Last time when triptime request send
+    lastTriptimeGot: 'double',          ///< Last time when triptime received
 
-    last_triptime: 'double',            ///< Last triptime
-    triptime: 'double',                 ///< Middle triptime
+    tripTimeLast: 'double',             ///< Last triptime
+    tripTime: 'double',                 ///< Middle triptime
 
-    monitor_time: 'double',             ///< Monitor ping time
+    monitorTime: 'double',              ///< Monitor ping time
 
-    connected_time: 'double'            ///< Time when peer was connected to this peer
+    connectedTime: 'double'             ///< Time when peer was connected to this peer
 
 });
 var ksnetArpDataPtr = ref.refType(ksnetArpData);
@@ -486,6 +486,8 @@ module.exports = {
 
         /**
          * Get Teonet event manager time
+         *
+         * @param {'pointer'} kc Pointer to ksnCoreClass
          *
          * @return Teonet event manager time
          */
