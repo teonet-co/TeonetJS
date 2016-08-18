@@ -230,7 +230,10 @@ var ksnetEvMgrClass = StructType({
 });
 var ksnetEvMgrClassPtr = ref.refType(ksnetEvMgrClass);
 
-//ksnet_arp_data
+/**
+ * KSNet ARP Data structure
+ * @type type
+ */
 var ksnetArpData = StructType({
 
     mode: 'int16',                      ///< Peers mode: -1 - This host, -2 undefined host, 0 - peer , 1 - r-host, 2 - TCP Proxy peer
@@ -251,6 +254,33 @@ var ksnetArpData = StructType({
 
 });
 var ksnetArpDataPtr = ref.refType(ksnetArpData);
+
+
+var ksnCQueClass = StructType({
+    
+    ke: ksnetEvMgrClassPtr,     ///< Pointer to ksnEvMgrClass
+    id: 'uint32',               ///< New callback queue ID
+    cque_map: 'pointer'         ///< Pointer to the callback queue pblMap
+    
+});
+var ksnCQueClassPtr = ref.refType(ksnCQueClass);
+
+/**
+ * KSNet Callback Queue Data structure
+ * 
+ * @type type
+ */
+var ksnCQueData = StructType({
+    
+    cb: 'pointer', //ksnCQueCallback, ///< Pointer to callback function
+    kq: ksnCQueClassPtr, ///< Pointer to ksnCQueClass
+    timeout: 'double',   ///< Timeout value
+    id: 'uint32',        ///< Callback ID (equal to key)
+    data: 'pointer'      ///< User data
+    //w: ev_timer          ///< Timeout watcher
+    
+});
+var ksnCQueDataPtr = ref.refType(ksnCQueData);
 
 function getLength(data) {
     return data ? data.length : 0;
@@ -432,6 +462,13 @@ module.exports = {
      * "The "ksnetArpData" struct type
      */
     'arpData': ksnetArpData,
+    //'arpDataPtr': ksnetArpDataPtr,
+    
+    /**
+     * The "ksnCQueData" structure type
+     */
+    'cqueData': ksnCQueData,
+    //'cqueDataPtr': ksnCQueDataPtr,
 
     lib: ffi.Library('libteonet', {
 
@@ -559,8 +596,58 @@ module.exports = {
          */
         'teoGetAppType': ['string', ['pointer']],
 
-        //ksnet_arp_data *ksnetArpGet(ksnetArpClass *ka, char *name);
-        'ksnetArpGet': [ksnetArpDataPtr, ['pointer', 'string']]
+        /**
+         * Get pointer to ARP Data
+         * 
+         * @param {'pointer'} ka Pointer to ksnetArpClass
+         * @param {'string'} name Peer name
+         * 
+         * @return {ksnetArpDataPtr} Pointer to ksnetArpData structure
+         * 
+         */
+        'ksnetArpGet': [ksnetArpDataPtr, ['pointer', 'string']],
+        
+        /**
+         * KSNet Callback Queue module Initialize
+         * 
+         * @param {ksnetEvMgrClassPtr} ke Pointer to ksnetEvMgrClass structure
+         * 
+         * @return {ksnCQueClassPtr} Ponter to ksnCQueClass structure
+         * 
+         */
+        //'ksnCQueInit': [ksnCQueClassPtr, [ksnetEvMgrClassPtr]],
+        
+        /**
+         * Destroy KSNet Callback Queue module
+         * 
+         * @param {ksnCQueClassPtr} kq Pointer to ksnCQueClass structure
+         */
+        //'ksnCQueDestroy': ['void', [ksnCQueClassPtr]],
+        
+        /**
+         * Execute callback queue record 
+         * 
+         * Get callback queue record and remove it from queue
+         * 
+         * @param {ksnCQueClassPtr} kq Pointer to ksnCQueClass
+         * @param {'uint32'} id Required ID
+         * 
+         * @return {'int'} return 0: if callback executed OK; !=0 some error occurred
+         */
+        'ksnCQueExec': ['int', [ksnCQueClassPtr], 'uint32'],
+        
+        /**
+         * Add callback to queue
+         * 
+         * @param {ksnCQueClassPtr} kq Pointer to ksnCQueClass
+         * @param {'pointer'} cb Callback [function](@ref ksnCQueCallback) or NULL. The teonet event 
+         *           EV_K_CQUE_CALLBACK should be send at the same time.
+         * @param {'double'} timeout Callback timeout. If equal to 0 than timeout sets automatically
+         * @param {'pointer'} data The user data which should be send to the Callback function
+         * 
+         * @return Pointer to added ksnCQueData or NULL if error occurred 
+         */
+        'ksnCQueAdd': [ksnCQueData, [ksnCQueClassPtr, 'pointer', 'double', 'pointer']]
     }),
 
     /**
@@ -723,9 +810,62 @@ module.exports = {
 
         return this.lib.ksnCommandSendCmdEcho(ksnCoreClass(ke.kc).kco, peer_name, data, getLength(data));
     },
+    
+    /**
+     * Convert javascript callback to C library callback
+     *
+     * @param {type} cqueCb
+     * @returns {nm$_ffi.exports.Callback}
+     */
+    cqueCbPtr: function (cqueCb) {
+
+        var cb = ffi.Callback('void', ['uint32_t', 'int', 'pointer'],
+            //cqueCb
+            function (id, type, data) {
+                cqueCb(id, type, data);
+            }
+        );
+
+        // hack for node-ffi
+        // see: https://github.com/node-ffi/node-ffi/issues/72
+        process.on('exit', function () {
+            cb;
+        });
+
+        return cb;
+    },    
+    
+    /**
+     * Add callback to queue
+     * 
+     * @param {ksnetEvMgrClassPtr} ke Pointer to ksnetEvMgrClass
+     * @param {'pointer'} cqueCb Callback [function](@ref ksnCQueCallback) or NULL. The teonet event 
+     *           EV_K_CQUE_CALLBACK should be send at the same time.
+     * @param {'double'} timeout Callback timeout. If equal to 0 than timeout sets automatically
+     * @param {'pointer'} data The user data which should be send to the Callback function
+     * 
+     * @return Pointer to added ksnCQueData or NULL if error occurred 
+     */    
+    cqueAdd: function (ke, cqueCb, timeout, data) {
+        return this.lib.ksnCQueAdd(ksnetEvMgrClassPtr(ke).kq, this.cqueCbPtr(cqueCb), timeout, data);
+    },
+    
+    /**
+     * Execute callback queue record 
+     * 
+     * Get callback queue record and remove it from queue
+     * 
+     * @param {ksnetEvMgrClassPtr} ke Pointer to ksnetEvMgrClass
+     * @param {'uint32'} id Required ID
+     * 
+     * @return {'int'} return 0: if callback executed OK; !=0 some error occurred
+     */
+    cqueExec: function (ke, id) {
+        return this.lib.ksnCQueExec(ksnetEvMgrClassPtr(ke).kq, id);
+    },
 
     /**
-     * Covert javascript callback to C library callback
+     * Convert javascript callback to C library callback
      *
      * @param {type} eventCb
      * @returns {nm$_ffi.exports.Callback}
