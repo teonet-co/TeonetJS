@@ -819,10 +819,12 @@ module.exports = {
      */
     cqueCbPtr: function (cqueCb) {
 
-        var cb = ffi.Callback('void', ['uint32_t', 'int', 'pointer'],
+        var cb = ffi.Callback('void', ['uint32', 'int', 'pointer'],
             //cqueCb
             function (id, type, data) {
-                cqueCb(id, type, data);
+                if(typeof cqueCb === 'function') {
+                    cqueCb(id, type, data);
+                }
             }
         );
 
@@ -847,7 +849,7 @@ module.exports = {
      * @return Pointer to added ksnCQueData or NULL if error occurred 
      */    
     cqueAdd: function (ke, cqueCb, timeout, data) {
-        return this.lib.ksnCQueAdd(ksnetEvMgrClassPtr(ke).kq, this.cqueCbPtr(cqueCb), timeout, data);
+        return this.lib.ksnCQueAdd(ke.kq, this.cqueCbPtr(cqueCb), timeout, data);
     },
     
     /**
@@ -861,7 +863,7 @@ module.exports = {
      * @return {'int'} return 0: if callback executed OK; !=0 some error occurred
      */
     cqueExec: function (ke, id) {
-        return this.lib.ksnCQueExec(ksnetEvMgrClassPtr(ke).kq, id);
+        return this.lib.ksnCQueExec(ke.kq, id);
     },
 
     /**
@@ -875,7 +877,9 @@ module.exports = {
         var cb = ffi.Callback('void', [ksnetEvMgrClassPtr, 'int', ksnCorePacketDataPtr, 'size_t', 'pointer'],
             //eventCb
             function (ke_ptr, ev, data, data_len, user_dat) {
-                eventCb(ksnetEvMgrClass(ke_ptr), ev, data, data_len, user_dat);
+                if(typeof cqueCb === 'function') {
+                    eventCb(ksnetEvMgrClass(ke_ptr), ev, data, data_len, user_dat);
+                }
             }
         );
 
