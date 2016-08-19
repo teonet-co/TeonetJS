@@ -877,7 +877,7 @@ module.exports = {
         var cb = ffi.Callback('void', [ksnetEvMgrClassPtr, 'int', ksnCorePacketDataPtr, 'size_t', 'pointer'],
             //eventCb
             function (ke_ptr, ev, data, data_len, user_dat) {
-                if(typeof cqueCb === 'function') {
+                if(typeof eventCb === 'function') {
                     eventCb(ksnetEvMgrClass(ke_ptr), ev, data, data_len, user_dat);
                 }
             }
