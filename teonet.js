@@ -634,7 +634,19 @@ module.exports = {
          * 
          * @return {'int'} return 0: if callback executed OK; !=0 some error occurred
          */
-        'ksnCQueExec': ['int', [ksnCQueClassPtr], 'uint32'],
+        'ksnCQueExec': ['int', [ksnCQueClassPtr, 'uint32']],
+        
+        
+        /**
+         * Set callback queue data, update data set in ksnCQueAdd
+         * 
+         * @param {ksnCQueClassPtr} kq Pointer to ksnCQueClass
+         * @param {'uint32'} id Existing callback queue ID
+         * @param {'string'} data Pointer to callback queue records data 
+         * 
+         * @return {'int'} return 0: if callback executed OK; !=0 some error occurred
+         */
+        'ksnCQueSetData': ['int', [ksnCQueClassPtr, 'uint32', 'string']],
         
         /**
          * Add callback to queue
@@ -643,11 +655,11 @@ module.exports = {
          * @param {'pointer'} cb Callback [function](@ref ksnCQueCallback) or NULL. The teonet event 
          *           EV_K_CQUE_CALLBACK should be send at the same time.
          * @param {'double'} timeout Callback timeout. If equal to 0 than timeout sets automatically
-         * @param {'pointer'} data The user data which should be send to the Callback function
+         * @param {'string'} data The user data which should be send to the Callback function
          * 
          * @return Pointer to added ksnCQueData or NULL if error occurred 
          */
-        'ksnCQueAdd': [ksnCQueData, [ksnCQueClassPtr, 'pointer', 'double', 'pointer']]
+        'ksnCQueAdd': [ksnCQueDataPtr, [ksnCQueClassPtr, 'pointer', 'double', 'string']]
     }),
 
     /**
@@ -819,7 +831,7 @@ module.exports = {
      */
     cqueCbPtr: function (cqueCb) {
 
-        var cb = ffi.Callback('void', ['uint32', 'int', 'pointer'],
+        var cb = ffi.Callback('void', ['uint32', 'int', 'string'],
             //cqueCb
             function (id, type, data) {
                 if(typeof cqueCb === 'function') {
@@ -862,8 +874,23 @@ module.exports = {
      * 
      * @return {'int'} return 0: if callback executed OK; !=0 some error occurred
      */
-    cqueExec: function (ke, id) {
+    cqueExec: function (ke, id) {        
         return this.lib.ksnCQueExec(ke.kq, id);
+    },
+
+    /**
+     * Execute callback queue record 
+     * 
+     * Get callback queue record and remove it from queue
+     * 
+     * @param {ksnetEvMgrClassPtr} ke Pointer to ksnetEvMgrClass
+     * @param {'uint32'} id Required ID
+     * @param {'string'} data Pointer to callback queue records data
+     * 
+     * @return {'int'} return 0: if callback executed OK; !=0 some error occurred
+     */
+    cqueSetData: function (ke, id, data) {        
+        return this.lib.ksnCQueSetData(ke.kq, id, data);
     },
 
     /**
