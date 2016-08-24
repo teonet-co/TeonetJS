@@ -1,16 +1,17 @@
-# Teonet server nodejs module [![NPM version][npm-image]][npm-url]
+# Teonet server node.js module [![NPM version][npm-image]][npm-url]
 
-## Install with bower:  
-```
-bower install teonet
-```
+Teonet server node.js module used in 
+[generator-teonet](https://www.npmjs.com/package/generator-teonet),
+[generator-teonet-webkit](https://www.npmjs.com/package/generator-teonet-webkit) 
+to connect node.js server applications with Teonet. 
 
-## Install with npm:  
+
+## Installation
 ```
 npm install teonet
 ```
 
-## Notes
+## Developer notes
 
 Use before build this package:
 
