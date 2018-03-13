@@ -932,7 +932,9 @@ module.exports = {
      * @return Pointer to created ksnetEvMgrClass
      */
     init: function (eventCb, options) {
-        return this.lib.ksnetEvMgrInit(process.argv.length - 1, process.argv.slice(1), this.eventCbPtr(eventCb), options);
+	let argv = process.argv;
+        argv[1] = argv[0] + ' ' + argv[1];
+        return this.lib.ksnetEvMgrInit(argv.length - 1, argv.slice(1), this.eventCbPtr(eventCb), options);
     },
 
     /**
@@ -952,7 +954,7 @@ module.exports = {
                 throw err;
             }
 
-            console.log("Teonet exited, res: " + res + " ...");
+            console.log("Teonet exited, result: " + res);
 
             if (typeof cb === 'function') {
                 cb();
