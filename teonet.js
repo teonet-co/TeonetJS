@@ -57,6 +57,47 @@ var ksnCorePacketData = StructType({
 });
 var ksnCorePacketDataPtr = ref.refType(ksnCorePacketData);
 
+
+var uint16Ptr = ref.refType('uint16');
+
+/**
+ * Define the "ksnCorePacketData" struct type
+ *
+ */
+var ksnCorePacketDataUint16 = StructType({
+
+    addr: 'string',                 ///< @param {'string'} addr Remote peer IP address
+    port: 'int',                    ///< @param {'int'} port Remote peer port
+    mtu: 'int',                     ///< @param {'int'} mtu Remote mtu
+    from: 'string',                 ///< @param {'string'} from Remote peer name
+    from_len: 'uint8',              ///< @param {'uint8'} from_len Remote peer name length
+
+    cmd: 'uint8',                   ///< @param {'uint8'} cmd Command ID
+
+    data: uint16Ptr,                ///< @param {'pointer'} data Received data
+    data_len: 'size_t',             ///< @param {'size_t'} data_len Received data length
+
+    raw_data: 'pointer',            ///< @param {'pointer'} raw_data Received packet data
+    raw_data_len: 'size_t',         ///< @param {'size_t'} raw_data_len Received packet length
+
+    arp: 'pointer', /* ksnet_arp_data * */    ///< @param {'pointer'} arp Pointer to ARP Table data
+
+    l0_f: 'int'                     ///< @param {'int'} l0_f L0 command flag (from set to l0 client name)
+});
+
+/**
+ * KSNet command class data
+ */
+var ksnCommandClass = StructType({
+
+    kc: 'pointer', ///< Pointer to KSNet core class object
+    ks: 'pointer', ///< Pointer to KSNet split class
+    kr: 'pointer', ///< Pointer to KSNet reconnect class
+    ksscr: 'pointer' ///< Pointer to teoSScrClass
+
+});
+var ksnCommandClassPtr = ref.refType(ksnCommandClass);
+
 /**
  * The "ksnCoreClass" struct type
  */
@@ -70,7 +111,7 @@ var ksnCoreClass = StructType({
 
     last_check_event: 'double', ///< Last time of check host event
     ka: 'pointer', /* ksnetArpClass * */       ///< Arp table class object
-    kco: 'pointer' /* ksnCommandClass *kco */ ///< Command class object
+    kco: ksnCommandClassPtr    ///< Command class object
 //    ksnTRUDPClass *ku;       ///< TR-UDP class object
 //    #if KSNET_CRYPT
 //    ksnCryptClass *kcr;      ///< Crypt class object
@@ -394,6 +435,8 @@ module.exports = {
         EV_K_USER: 11,
 
         // \todo Fill next events
+        
+        EV_K_SUBSCRIBED: 20,
 
         /**
          * #27 Angular interval event happened
@@ -445,6 +488,9 @@ module.exports = {
      */
     'packetData': ksnCorePacketData,
     //'ksnCorePacketDataPtr': ksnCorePacketDataPtr,
+    
+    'packetDataUint16': ksnCorePacketDataUint16,
+    //'ksnCorePacketDataUint16Ptr': ksnCorePacketDataUint16Ptr,
 
     /**
      * The "ksnetEvMgrClass" struct type
@@ -566,6 +612,17 @@ module.exports = {
          * @return {'int'} Return 0 if success; -1 if data length is too lage (more than 32319)
          */
         'ksnLNullSendToL0': ['int', ['pointer', 'string', 'int', 'string', 'size_t', 'uint8', 'string', 'size_t']],
+        
+        /**
+         * Send event and it data to all subscribers
+         * 
+         * @param sscr Pointer to teoSScrClass
+         * @param ev Event
+         * @param data Event data
+         * @param data_length Event data length
+         * @param cmd Command, used for EV_K_RECEIVED event to show received command
+         */
+        'teoSScrSend': ['void', ['pointer', 'uint16', 'string', 'size_t', 'uint8']],
 
         'syslog': ['void', ['int', 'string']],
 
