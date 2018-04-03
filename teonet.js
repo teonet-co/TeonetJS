@@ -86,6 +86,31 @@ var ksnCorePacketDataUint16 = StructType({
 });
 
 /**
+ * Define the "ksnCorePacketData" struct type
+ *
+ */
+var ksnCorePacketDataPointer = StructType({
+
+    addr: 'string',                 ///< @param {'string'} addr Remote peer IP address
+    port: 'int',                    ///< @param {'int'} port Remote peer port
+    mtu: 'int',                     ///< @param {'int'} mtu Remote mtu
+    from: 'string',                 ///< @param {'string'} from Remote peer name
+    from_len: 'uint8',              ///< @param {'uint8'} from_len Remote peer name length
+
+    cmd: 'uint8',                   ///< @param {'uint8'} cmd Command ID
+
+    data: 'pointer',                ///< @param {'pointer'} data Received data
+    data_len: 'size_t',             ///< @param {'size_t'} data_len Received data length
+
+    raw_data: 'pointer',            ///< @param {'pointer'} raw_data Received packet data
+    raw_data_len: 'size_t',         ///< @param {'size_t'} raw_data_len Received packet length
+
+    arp: 'pointer', /* ksnet_arp_data * */    ///< @param {'pointer'} arp Pointer to ARP Table data
+
+    l0_f: 'int'                     ///< @param {'int'} l0_f L0 command flag (from set to l0 client name)
+});
+
+/**
  * KSNet command class data
  */
 var ksnCommandClass = StructType({
@@ -491,6 +516,8 @@ module.exports = {
     
     'packetDataUint16': ksnCorePacketDataUint16,
     //'ksnCorePacketDataUint16Ptr': ksnCorePacketDataUint16Ptr,
+    
+    'packetDataPointer': ksnCorePacketDataPointer,
 
     /**
      * The "ksnetEvMgrClass" struct type
