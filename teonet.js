@@ -1082,7 +1082,21 @@ module.exports = {
         // Start teonet
         this.run(ke, ffiAsyncCb);
     },
-
+    
+    dataToBuffer: function (data, data_length) {
+        return ref.reinterpret(data, data_length, 0);
+    },
+    
+    /**
+     * Convert teonet rd data pointer to uint8 array
+     * 
+     * @param {type} data Teonet rd data pointer
+     * @param {type} data_length Data length
+     * @return {Uint8Array} Data converted to Uint8Array
+     */
+    dataToUint8Array: function (data, data_length) {
+        return new Uint8Array(this.dataToBuffer(data, data_length));
+    },
 
     /**
      * Get object for logging to syslog
