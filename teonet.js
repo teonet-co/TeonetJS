@@ -349,7 +349,7 @@ var ksnCQueData = StructType({
 var ksnCQueDataPtr = ref.refType(ksnCQueData);
 
 function getLength(data) {
-    return data ? data.length : 0;
+    return data ? data.length + 1 : 0;
 }
 
 
@@ -827,7 +827,31 @@ module.exports = {
     },
 
     /**
-     * Send request answer data to Peer or L0 server client (
+     * Send request answer data (binary) to Peer or L0 server client (
+     *
+     * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+     * @param {'pointer'|object} rd Pointer to ksnCorePacketData
+     * param {'string'}  name Peer or Client name
+     * @param {'uint8'} cmd Comand to send
+     * @param {'pointer'} out_data Output data
+     * @returns {'int'|'pointer'}
+     */
+    sendCmdAnswerToBinary: function (ke, rd, cmd, out_data, out_data_length) {
+
+        var retavl;
+
+        if (rd.l0_f) {
+            retavl = this.lib.ksnLNullSendToL0(ke.ksn_cfg.ke, rd.addr, rd.port, rd.from, rd.from_len, cmd, out_data, out_data_length);
+        }
+        else {
+            retavl = this.lib.ksnCoreSendto(ke.kc, rd.addr, rd.port, cmd, out_data, out_data_length);
+        }
+
+        return retavl;
+    },
+
+    /**
+     * Send request answer data (string) to Peer or L0 server client (
      *
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
      * @param {'pointer'|object} rd Pointer to ksnCorePacketData
@@ -837,19 +861,9 @@ module.exports = {
      * @returns {'int'|'pointer'}
      */
     sendCmdAnswerTo: function (ke, rd, cmd, out_data) {
-
-        var retavl;
-
-        if (rd.l0_f) {
-            retavl = this.lib.ksnLNullSendToL0(ke.ksn_cfg.ke, rd.addr, rd.port, rd.from, rd.from_len, cmd, out_data, getLength(out_data));
-        }
-        else {
-            retavl = this.lib.ksnCoreSendto(ke.kc, rd.addr, rd.port, cmd, out_data, getLength(out_data));
-        }
-
-        return retavl;
+        return this.sendCmdAnswerToBinary(ke, rd, cmd, out_data, getLength(out_data));
     },
-
+    
     /**
      * Clone an object
      *
