@@ -323,28 +323,28 @@ var ksnetArpDataPtr = ref.refType(ksnetArpData);
 
 
 var ksnCQueClass = StructType({
-    
+
     ke: ksnetEvMgrClassPtr,     ///< Pointer to ksnEvMgrClass
     id: 'uint32',               ///< New callback queue ID
     cque_map: 'pointer'         ///< Pointer to the callback queue pblMap
-    
+
 });
 var ksnCQueClassPtr = ref.refType(ksnCQueClass);
 
 /**
  * KSNet Callback Queue Data structure
- * 
+ *
  * @type type
  */
 var ksnCQueData = StructType({
-    
+
     cb: 'pointer', //ksnCQueCallback, ///< Pointer to callback function
     kq: ksnCQueClassPtr, ///< Pointer to ksnCQueClass
     timeout: 'double',   ///< Timeout value
     id: 'uint32',        ///< Callback ID (equal to key)
     data: 'pointer'      ///< User data
     //w: ev_timer          ///< Timeout watcher
-    
+
 });
 var ksnCQueDataPtr = ref.refType(ksnCQueData);
 
@@ -460,7 +460,7 @@ module.exports = {
         EV_K_USER: 11,
 
         // \todo Fill next events
-        
+
         EV_K_SUBSCRIBED: 20,
 
         /**
@@ -513,10 +513,10 @@ module.exports = {
      */
     'packetData': ksnCorePacketData,
     //'ksnCorePacketDataPtr': ksnCorePacketDataPtr,
-    
+
     'packetDataUint16': ksnCorePacketDataUint16,
     //'ksnCorePacketDataUint16Ptr': ksnCorePacketDataUint16Ptr,
-    
+
     'packetDataPointer': ksnCorePacketDataPointer,
 
     /**
@@ -530,13 +530,13 @@ module.exports = {
      */
     'ksnCoreClass': ksnCoreClass,
     //'ksnCoreClassPtr': ksnCoreClassPtr,
-    
+
     /**
      * "The "ksnetArpData" struct type
      */
     'arpData': ksnetArpData,
     //'arpDataPtr': ksnetArpDataPtr,
-    
+
     /**
      * The "ksnCQueData" structure type
      */
@@ -639,17 +639,18 @@ module.exports = {
          * @return {'int'} Return 0 if success; -1 if data length is too lage (more than 32319)
          */
         'ksnLNullSendToL0': ['int', ['pointer', 'string', 'int', 'string', 'size_t', 'uint8', 'string', 'size_t']],
-        
+
         /**
          * Send event and it data to all subscribers
-         * 
+         *
          * @param sscr Pointer to teoSScrClass
          * @param ev Event
          * @param data Event data
          * @param data_length Event data length
          * @param cmd Command, used for EV_K_RECEIVED event to show received command
          */
-        'teoSScrSend': ['void', ['pointer', 'uint16', 'string', 'size_t', 'uint8']],
+        //'teoSScrSend': ['void', ['pointer', 'uint16', 'string', 'size_t', 'uint8']],
+        'teoSScrSend': ['void', ['pointer', 'uint16', 'pointer', 'size_t', 'uint8']],
 
         'syslog': ['void', ['int', 'string']],
 
@@ -682,66 +683,66 @@ module.exports = {
 
         /**
          * Get pointer to ARP Data
-         * 
+         *
          * @param {'pointer'} ka Pointer to ksnetArpClass
          * @param {'string'} name Peer name
-         * 
+         *
          * @return {ksnetArpDataPtr} Pointer to ksnetArpData structure
-         * 
+         *
          */
         'ksnetArpGet': [ksnetArpDataPtr, ['pointer', 'string']],
-        
+
         /**
          * KSNet Callback Queue module Initialize
-         * 
+         *
          * @param {ksnetEvMgrClassPtr} ke Pointer to ksnetEvMgrClass structure
-         * 
+         *
          * @return {ksnCQueClassPtr} Ponter to ksnCQueClass structure
-         * 
+         *
          */
         //'ksnCQueInit': [ksnCQueClassPtr, [ksnetEvMgrClassPtr]],
-        
+
         /**
          * Destroy KSNet Callback Queue module
-         * 
+         *
          * @param {ksnCQueClassPtr} kq Pointer to ksnCQueClass structure
          */
         //'ksnCQueDestroy': ['void', [ksnCQueClassPtr]],
-        
+
         /**
-         * Execute callback queue record 
-         * 
+         * Execute callback queue record
+         *
          * Get callback queue record and remove it from queue
-         * 
+         *
          * @param {ksnCQueClassPtr} kq Pointer to ksnCQueClass
          * @param {'uint32'} id Required ID
-         * 
+         *
          * @return {'int'} return 0: if callback executed OK; !=0 some error occurred
          */
         'ksnCQueExec': ['int', [ksnCQueClassPtr, 'uint32']],
-        
-        
+
+
         /**
          * Set callback queue data, update data set in ksnCQueAdd
-         * 
+         *
          * @param {ksnCQueClassPtr} kq Pointer to ksnCQueClass
          * @param {'uint32'} id Existing callback queue ID
-         * @param {'string'} data Pointer to callback queue records data 
-         * 
+         * @param {'string'} data Pointer to callback queue records data
+         *
          * @return {'int'} return 0: if callback executed OK; !=0 some error occurred
          */
         'ksnCQueSetData': ['int', [ksnCQueClassPtr, 'uint32', 'string']],
-        
+
         /**
          * Add callback to queue
-         * 
+         *
          * @param {ksnCQueClassPtr} kq Pointer to ksnCQueClass
-         * @param {'pointer'} cb Callback [function](@ref ksnCQueCallback) or NULL. The teonet event 
+         * @param {'pointer'} cb Callback [function](@ref ksnCQueCallback) or NULL. The teonet event
          *           EV_K_CQUE_CALLBACK should be send at the same time.
          * @param {'double'} timeout Callback timeout. If equal to 0 than timeout sets automatically
          * @param {'string'} data The user data which should be send to the Callback function
-         * 
-         * @return Pointer to added ksnCQueData or NULL if error occurred 
+         *
+         * @return Pointer to added ksnCQueData or NULL if error occurred
          */
         'ksnCQueAdd': [ksnCQueDataPtr, [ksnCQueClassPtr, 'pointer', 'double', 'string']]
     }),
@@ -804,9 +805,9 @@ module.exports = {
     getAppType: function (ke) {
         return this.lib.teoGetAppType(ke);
     },
-    
+
     /**
-     * 
+     *
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
      * @param {'string'}  peer_name Peer name to get ARP record for
      * @returns {ksnetArpDataPtr} Pointer to ksnetArpData (ksnet_arp_data) or null if "peer_name" peer is absent
@@ -863,7 +864,7 @@ module.exports = {
     sendCmdAnswerTo: function (ke, rd, cmd, out_data) {
         return this.sendCmdAnswerToBinary(ke, rd, cmd, out_data, getLength(out_data));
     },
-    
+
     /**
      * Clone an object
      *
@@ -899,7 +900,7 @@ module.exports = {
      * @param {'string'} peer_name
      * @param {'uint8'} cmd
      * @param {'pointer'} data
-     * 
+     *
      * @returns {'int'}
      */
     sendCmdToClient: function(ke, addr, port, peer_name, cmd, data) {
@@ -920,7 +921,7 @@ module.exports = {
 
         return this.lib.ksnCommandSendCmdEcho(ksnCoreClass(ke.kc).kco, peer_name, data, getLength(data));
     },
-    
+
     /**
      * Convert javascript callback to C library callback
      *
@@ -945,49 +946,49 @@ module.exports = {
         });
 
         return cb;
-    },    
-    
+    },
+
     /**
      * Add callback to queue
-     * 
+     *
      * @param {ksnetEvMgrClassPtr} ke Pointer to ksnetEvMgrClass
-     * @param {'pointer'} cqueCb Callback [function](@ref ksnCQueCallback) or NULL. The teonet event 
+     * @param {'pointer'} cqueCb Callback [function](@ref ksnCQueCallback) or NULL. The teonet event
      *           EV_K_CQUE_CALLBACK should be send at the same time.
      * @param {'double'} timeout Callback timeout. If equal to 0 than timeout sets automatically
      * @param {'pointer'} data The user data which should be send to the Callback function
-     * 
-     * @return Pointer to added ksnCQueData or NULL if error occurred 
-     */    
+     *
+     * @return Pointer to added ksnCQueData or NULL if error occurred
+     */
     cqueAdd: function (ke, cqueCb, timeout, data) {
         return this.lib.ksnCQueAdd(ke.kq, this.cqueCbPtr(cqueCb), timeout, data);
     },
-    
+
     /**
-     * Execute callback queue record 
-     * 
+     * Execute callback queue record
+     *
      * Get callback queue record and remove it from queue
-     * 
+     *
      * @param {ksnetEvMgrClassPtr} ke Pointer to ksnetEvMgrClass
      * @param {'uint32'} id Required ID
-     * 
+     *
      * @return {'int'} return 0: if callback executed OK; !=0 some error occurred
      */
-    cqueExec: function (ke, id) {        
+    cqueExec: function (ke, id) {
         return this.lib.ksnCQueExec(ke.kq, id);
     },
 
     /**
-     * Execute callback queue record 
-     * 
+     * Execute callback queue record
+     *
      * Get callback queue record and remove it from queue
-     * 
+     *
      * @param {ksnetEvMgrClassPtr} ke Pointer to ksnetEvMgrClass
      * @param {'uint32'} id Required ID
      * @param {'string'} data Pointer to callback queue records data
-     * 
+     *
      * @return {'int'} return 0: if callback executed OK; !=0 some error occurred
      */
-    cqueSetData: function (ke, id, data) {        
+    cqueSetData: function (ke, id, data) {
         return this.lib.ksnCQueSetData(ke.kq, id, data);
     },
 
@@ -1096,20 +1097,40 @@ module.exports = {
         // Start teonet
         this.run(ke, ffiAsyncCb);
     },
-    
+
     dataToBuffer: function (data, data_length) {
         return ref.reinterpret(data, data_length, 0);
     },
-    
+
     /**
      * Convert teonet rd data pointer to uint8 array
-     * 
+     *
      * @param {type} data Teonet rd data pointer
      * @param {type} data_length Data length
      * @return {Uint8Array} Data converted to Uint8Array
      */
     dataToUint8Array: function (data, data_length) {
         return new Uint8Array(this.dataToBuffer(data, data_length));
+    },
+
+    /**
+     * Send event with string data to subscribers
+     *
+     * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+     * @param {int} event Event number
+     * @param {string|pointer} data Data string or buffer
+     * @param {int} data_length Data length, may be empty for string
+     * @param {ind} cmd Command number, used for EV_K_RECEIVED event to show received command
+     * @return {undefined}
+     */
+    sendToSscr: function(ke, event, data, data_length, cmd) {
+        var buf_length = data_length || data.length + 1;
+        var buf = Buffer.from(data, buf_length);
+        if(!data_length) buf[buf_length-1] = '\0';
+        this.lib.teoSScrSend(
+            ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr,
+            event, buf, buf_length, cmd || 0
+        );
     },
 
     /**
