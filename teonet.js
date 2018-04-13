@@ -797,7 +797,7 @@ module.exports = {
     },
 
     /**
-     * Get application version
+     * Get application type
      *
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
      * @returns {'string'} This application version
@@ -832,9 +832,9 @@ module.exports = {
      *
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
      * @param {'pointer'|object} rd Pointer to ksnCorePacketData
-     * param {'string'}  name Peer or Client name
      * @param {'uint8'} cmd Comand to send
      * @param {'pointer'} out_data Output data
+     * @param {'int'} out_data Output data length
      * @returns {'int'|'pointer'}
      */
     sendCmdAnswerToBinary: function (ke, rd, cmd, out_data, out_data_length) {
@@ -856,9 +856,9 @@ module.exports = {
      *
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
      * @param {'pointer'|object} rd Pointer to ksnCorePacketData
-     * param {'string'}  name Peer or Client name
      * @param {'uint8'} cmd Comand to send
-     * @param {'pointer'} out_data Output data
+     * @param {'string'} out_data Output data
+     * 
      * @returns {'int'|'pointer'}
      */
     sendCmdAnswerTo: function (ke, rd, cmd, out_data) {
@@ -877,18 +877,48 @@ module.exports = {
     },
 
     /**
-     * Send command to peer
+     * Send command with string data to peer
+     *
+     * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+     * @param {'string'} peer_name Peer name to send to
+     * @param {'uint8'} cmd Command number
+     * @param {'string'} data Commands data
+     *
+     * @return {'pointer'} Pointer to ksnetArpData (ksnet_arp_data) or null if "to" peer is absent
+     */
+    sendCmdTo: function (ke, peer_name, cmd, data) {
+        return this.lib.ksnCoreSendCmdto(ke.kc, peer_name, cmd, data, getLength(data));
+    },
+
+    /**
+     * Send command with string data to peer
      *
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
      * @param {'string'} peer_name Peer name to send to
      * @param {'uint8'} cmd Command number
      * @param {'pointer'} data Commands data
+     * @param {'int'} out_data Output data length
      *
      * @return {'pointer'} Pointer to ksnetArpData (ksnet_arp_data) or null if "to" peer is absent
      */
-    sendCmdTo: function (ke, peer_name, cmd, data) {
+    sendCmdToBinary: function (ke, peer_name, cmd, data, data_length) {
+        return this.lib.ksnCoreSendCmdto(ke.kc, peer_name, cmd, data, data_length);
+    },
 
-        return this.lib.ksnCoreSendCmdto(ke.kc, peer_name, cmd, data, getLength(data));
+    /**
+     * Send command to L0 client
+     *
+     * @param {'pointer'} ke
+     * @param {'string'} addr
+     * @param {'int'} port
+     * @param {'string'} peer_name
+     * @param {'uint8'} cmd
+     * @param {'string'} data
+     *
+     * @returns {'int'}
+     */
+    sendCmdToClient: function(ke, addr, port, peer_name, cmd, data) {
+        return this.lib.ksnLNullSendToL0(ke, addr, port, peer_name, peer_name.length, cmd, data, getLength(data));
     },
 
     /**
@@ -900,12 +930,12 @@ module.exports = {
      * @param {'string'} peer_name
      * @param {'uint8'} cmd
      * @param {'pointer'} data
+     * @param {'int'} out_data Output data length
      *
      * @returns {'int'}
      */
-    sendCmdToClient: function(ke, addr, port, peer_name, cmd, data) {
-
-        return this.lib.ksnLNullSendToL0(ke, addr, port, peer_name, peer_name.length, cmd, data, getLength(data));
+    sendCmdToClientBinary: function(ke, addr, port, peer_name, cmd, data, data_length) {
+        return this.lib.ksnLNullSendToL0(ke, addr, port, peer_name, peer_name.length, cmd, data, data_length);
     },
 
     /**
@@ -913,12 +943,11 @@ module.exports = {
      *
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
      * @param {'pointer'} peer_name Peer name to send to
-     * @param {'pointer'} data Commands data
+     * @param {'string'} data Commands data
      *
      * @return {'pointer'} Pointer to ksnet_arp_data or null if "to" peer is absent
      */
     sendCmdEchoTo: function (ke, peer_name, data) {
-
         return this.lib.ksnCommandSendCmdEcho(ksnCoreClass(ke.kc).kco, peer_name, data, getLength(data));
     },
 
@@ -1119,7 +1148,7 @@ module.exports = {
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
      * @param {int} event Event number
      * @param {string|pointer} data Data string or buffer
-     * @param {int} data_length Data length, may be empty for string
+     * @param {int} data_length Data length, may be empty for string. If data is string than length should be equal string length + 1.
      * @param {ind} cmd Command number, used for EV_K_RECEIVED event to show received command
      * @return {undefined}
      */
