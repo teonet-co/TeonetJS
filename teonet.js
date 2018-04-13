@@ -614,7 +614,7 @@ module.exports = {
          *
          * @return {'pointer'} Pointer to ksnet_arp_data or null if "to" peer is absent
          */
-        'ksnCoreSendCmdto': ['pointer', ['pointer', 'string', 'uint8', 'string', 'size_t']],
+        'ksnCoreSendCmdto': ['pointer', ['pointer', 'string', 'uint8', 'pointer', 'size_t']],
 
         // ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_ECHO_ANSWER,
         //          rd->data, rd->data_len);
@@ -797,7 +797,7 @@ module.exports = {
     },
 
     /**
-     * Get application version
+     * Get application type
      *
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
      * @returns {'string'} This application version
@@ -887,7 +887,6 @@ module.exports = {
      * @return {'pointer'} Pointer to ksnetArpData (ksnet_arp_data) or null if "to" peer is absent
      */
     sendCmdTo: function (ke, peer_name, cmd, data) {
-
         return this.lib.ksnCoreSendCmdto(ke.kc, peer_name, cmd, data, getLength(data));
     },
 
