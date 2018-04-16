@@ -348,6 +348,20 @@ var ksnCQueData = StructType({
 });
 var ksnCQueDataPtr = ref.refType(ksnCQueData);
 
+/**
+ * TeoDB Data structure
+ *
+ * @type type
+ */
+var teoDBData = StructType({
+    key_length: 'uint8',
+    data_length: 'uint32',
+    id: 'uint32',
+    key_data: 'string'
+});
+var teoDBDataPtr = ref.refType(teoDBData);
+var sizePtr = ref.refType('size_t');
+
 function getLength(data) {
     return data ? data.length + 1 : 0;
 }
@@ -758,7 +772,7 @@ module.exports = {
          *
          * @return Result packet, should be free after use
          */
-        'prepare_request_data': ['pointer', ['pointer', 'size_t', 'pointer', 'size_t', 'uint32', 'pointer']]
+        'prepare_request_data': [teoDBDataPtr, ['pointer', 'size_t', 'pointer', 'size_t', 'uint32', sizePtr]]
     }),
 
     /**
@@ -1189,12 +1203,13 @@ module.exports = {
      * @return Result packet, should be free after use
      */
     teodbSet: function(ke, peer_name, key, data, id) {
-        var req_length = ref.alloc('int');
-        console.log(peer_name, key, data);
-        var req = this.lib.prepare_request_data(key, getLength(key), data,
+        var req_length = ref.alloc('size_t');
+        console.log("LOG ", peer_name, key, data, getLength(key));
+        //var req 
+        teoDBDataPtr  = this.lib.prepare_request_data(key, getLength(key), data,
             getLength(data), id, req_length);
         console.log("REQ_LEN: ", req_length.deref());
-        this.sendCmdToBinary(ke, peer_name, 129, req, req_length);
+        this.sendCmdToBinary(ke, peer_name, 129, teoDBDataPtr, req_length.deref());
      },
 
     /**
