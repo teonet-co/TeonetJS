@@ -744,7 +744,21 @@ module.exports = {
          *
          * @return Pointer to added ksnCQueData or NULL if error occurred
          */
-        'ksnCQueAdd': [ksnCQueDataPtr, [ksnCQueClassPtr, 'pointer', 'double', 'string']]
+        'ksnCQueAdd': [ksnCQueDataPtr, [ksnCQueClassPtr, 'pointer', 'double', 'string']],
+
+        /**
+         * Prepare teonet db data
+         *
+         * @param key Key
+         * @param key_len Key length
+         * @param data Pointer to value
+         * @param data_len Value length
+         * @param id Request ID
+         * @param tdd_len Pointer to variable to hold result packet length
+         *
+         * @return Result packet, should be free after use
+         */
+        'prepare_request_data': ['pointer', ['pointer', 'size_t', 'pointer', 'size_t', 'uint32', 'pointer']]
     }),
 
     /**
@@ -1161,6 +1175,27 @@ module.exports = {
             event, buf, buf_length, cmd || 0
         );
     },
+
+    /**
+     * Prepare teonet db data
+     *
+     * @param key Key
+     * @param key_len Key length
+     * @param data Pointer to value
+     * @param data_len Value length
+     * @param id Request ID
+     * @param tdd_len Pointer to variable to hold result packet length
+     *
+     * @return Result packet, should be free after use
+     */
+    teodbSet: function(ke, peer_name, key, data, id) {
+        var req_length = ref.alloc('int');
+        console.log(peer_name, key, data);
+        var req = this.lib.prepare_request_data(key, getLength(key), data,
+            getLength(data), id, req_length);
+        console.log("REQ_LEN: ", req_length.deref());
+        this.sendCmdToBinary(ke, peer_name, 129, req, req_length);
+     },
 
     /**
      * Get object for logging to syslog
