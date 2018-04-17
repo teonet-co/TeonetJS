@@ -31,6 +31,9 @@ var ArrayType = require('ref-array');
 var StructType = require('ref-struct');
 var StringArray = ArrayType('string');
 
+var uint16Ptr = ref.refType('uint16');
+var sizePtr = ref.refType('size_t');
+
 /**
  * Define the "ksnCorePacketData" struct type
  *
@@ -57,8 +60,6 @@ var ksnCorePacketData = StructType({
 });
 var ksnCorePacketDataPtr = ref.refType(ksnCorePacketData);
 
-
-var uint16Ptr = ref.refType('uint16');
 
 /**
  * Define the "ksnCorePacketData" struct type
@@ -360,7 +361,6 @@ var teoDBData = StructType({
     key_data: 'string'
 });
 var teoDBDataPtr = ref.refType(teoDBData);
-var sizePtr = ref.refType('size_t');
 
 function getLength(data) {
     return data ? data.length + 1 : 0;
@@ -772,7 +772,7 @@ module.exports = {
          *
          * @return Result packet, should be free after use
          */
-        'prepare_request_data': [teoDBDataPtr, ['pointer', 'size_t', 'pointer', 'size_t', 'uint32', sizePtr]]
+        'prepare_request_data': ['pointer', ['string', 'size_t', 'string', 'size_t', 'uint32', sizePtr]]
     }),
 
     /**
@@ -1203,13 +1203,10 @@ module.exports = {
      * @return Result packet, should be free after use
      */
     teodbSet: function(ke, peer_name, key, data, id) {
-        var req_length = ref.alloc('size_t');
-        console.log("LOG ", peer_name, key, data, getLength(key));
-        //var req 
-        teoDBDataPtr  = this.lib.prepare_request_data(key, getLength(key), data,
+        var req_length = ref.alloc(sizePtr);
+        var req = this.lib.prepare_request_data(key, getLength(key), data,
             getLength(data), id, req_length);
-        console.log("REQ_LEN: ", req_length.deref());
-        this.sendCmdToBinary(ke, peer_name, 129, teoDBDataPtr, req_length.deref());
+        this.sendCmdToBinary(ke, peer_name, 129, req, req_length.readUInt32LE(0)); // req_length.readUInt64LE(0)
      },
 
     /**
