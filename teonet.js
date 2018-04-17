@@ -1191,14 +1191,13 @@ module.exports = {
     },
 
     /**
-     * Prepare teonet db data
+     * Send CMD_SET = 129 to teodb app
      *
-     * @param key Key
-     * @param key_len Key length
-     * @param data Pointer to value
+     * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+     * @param peer_name
+     * @param key
      * @param data_len Value length
      * @param id Request ID
-     * @param tdd_len Pointer to variable to hold result packet length
      *
      * @return Result packet, should be free after use
      */
@@ -1207,6 +1206,24 @@ module.exports = {
         var req = this.lib.prepare_request_data(key, getLength(key), data,
             getLength(data), id, req_length);
         this.sendCmdToBinary(ke, peer_name, 129, req, req_length.readUInt32LE(0)); // req_length.readUInt64LE(0)
+    },
+
+    /**
+     * Send CMD_GET = 130 to teodb app
+     *
+     * @param {'pointer'} ke Pointer to ksnetEvMgrClass
+     * @param peer_name
+     * @param key
+     * @param data_len Value length
+     * @param id Request ID
+     *
+     * @return Result packet, should be free after use
+     */
+    teodbGet: function(ke, peer_name, key, data, id) {
+        var req_length = ref.alloc(sizePtr);
+        var req = this.lib.prepare_request_data(key, getLength(key), data,
+            /*getLength(data)*/0, id, req_length);
+        this.sendCmdToBinary(ke, peer_name, 130, req, req_length.readUInt32LE(0)); // req_length.readUInt64LE(0)
      },
 
     /**
