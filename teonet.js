@@ -475,6 +475,7 @@ module.exports = {
 
         // \todo Fill next events
 
+        EV_K_SUBSCRIBE: 19,     // Subscribe answer command received
         EV_K_SUBSCRIBED: 20,
 
         /**
@@ -772,7 +773,9 @@ module.exports = {
          *
          * @return Result packet, should be free after use
          */
-        'prepare_request_data': ['pointer', ['string', 'size_t', 'string', 'size_t', 'uint32', sizePtr]]
+        'prepare_request_data': ['pointer', ['string', 'size_t', 'string', 'size_t', 'uint32', sizePtr]],
+        
+        'teoSScrSubscribe': ['void', ['pointer', 'string', 'uint16']]
     }),
 
     /**
@@ -946,7 +949,7 @@ module.exports = {
      * @returns {'int'}
      */
     sendCmdToClient: function(ke, addr, port, peer_name, cmd, data) {
-        return this.lib.ksnLNullSendToL0(ke, addr, port, peer_name, peer_name.length, cmd, data, getLength(data));
+        return this.lib.ksnLNullSendToL0(ke, addr, port, peer_name, getLength(peer_name), cmd, data, getLength(data));
     },
 
     /**
@@ -1224,6 +1227,10 @@ module.exports = {
         var req = this.lib.prepare_request_data(key, getLength(key), data,
             /*getLength(data)*/0, id, req_length);
         this.sendCmdToBinary(ke, peer_name, 130, req, req_length.readUInt32LE(0)); // req_length.readUInt64LE(0)
+     },
+     
+     subscribe: function(ke, peer, ev) {
+         this.lib.teoSScrSubscribe(ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr, peer, ev);
      },
 
     /**
