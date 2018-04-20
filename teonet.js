@@ -1219,12 +1219,12 @@ module.exports = {
      *
      * @return Result packet, should be free after use
      */
-    teodbGet: function (ke, peer_name, key, data, id) {
-        const req_length = ref.alloc(sizePtr);
-        const req = this.lib.prepare_request_data(key, getLength(key), data, 0, id, req_length);
-        this.sendCmdToBinary(ke, peer_name, 130, req, req_length.readUInt32LE(0));
-        this.sendCmdToBinary(ke, peer_name, 132, req, req_length.readUInt32LE(0));
-    },
+    teodbGet: function(ke, peer_name, key, data, id) {
+        var req_length = ref.alloc(sizePtr);
+        var req = this.lib.prepare_request_data(key, getLength(key), data,
+            /*getLength(data)*/0, id, req_length);
+        this.sendCmdToBinary(ke, peer_name, 130, req, req_length.readUInt32LE(0)); // req_length.readUInt64LE(0)
+     },
 
     /**
      * Get object for logging to syslog
