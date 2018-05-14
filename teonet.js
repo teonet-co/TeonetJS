@@ -1184,12 +1184,11 @@ module.exports = {
      * @return {undefined}
      */
     sendToSscr: function(ke, event, data, data_length, cmd) {
-        var buf_length = data_length || data.length + 1;
-        var buf = Buffer.from(data, buf_length);
-        if(!data_length) buf[buf_length-1] = '\0';
+        var buf = Buffer.from(data);
+        if(!data_length) buf = Buffer.concat([buf, Buffer.from('\0')], buf.length + 1 );
         this.lib.teoSScrSend(
             ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr,
-            event, buf, buf_length, cmd || 0
+            event, buf, buf.length, cmd || 0
         );
     },
 
