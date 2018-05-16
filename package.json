@@ -1,8 +1,8 @@
 {
   "name": "teonet",
-  "version": "0.0.54",
+  "version": "0.0.55",
   "description": "Teonet server nodejs module",
-  "homepage": "https://gitlab.ksproject.org/teonet/TeonetJS",
+  "homepage": "https://github.com/teonet-co/TeonetJS",
   "main": "teonet.js",
   "directories": {
     "test": "test"
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.ksproject.org/teonet/TeonetJS.git"
+    "url": "https://github.com/teonet-co/TeonetJS.git"
   },
   "keywords": [
     "teonet",
