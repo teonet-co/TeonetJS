@@ -1,12 +1,16 @@
 {
   "name": "teonet",
-  "version": "0.0.55",
+  "version": "0.0.56",
   "description": "Teonet server nodejs module",
   "homepage": "https://github.com/teonet-co/TeonetJS",
   "main": "teonet.js",
   "directories": {
     "test": "test"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

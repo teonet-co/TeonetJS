@@ -775,7 +775,10 @@ module.exports = {
          */
         'prepare_request_data': ['pointer', ['string', 'size_t', 'string', 'size_t', 'uint32', sizePtr]],
         
-        'teoSScrSubscribe': ['void', ['pointer', 'string', 'uint16']]
+        'teoSScrSubscribe': ['void', ['pointer', 'string', 'uint16']],
+        
+        // teoLogPuts(ksnet_cfg *ksn_cfg, const char* module , int type, const char* message);
+        'teoLogPuts': ['int', ['pointer', 'string' , 'int', 'string']]
     }),
 
     /**
@@ -1230,6 +1233,11 @@ module.exports = {
      
      subscribe: function(ke, peer, ev) {
          this.lib.teoSScrSubscribe(ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr, peer, ev);
+     },
+     
+     teoLogPuts: function(ke, level, messages) {
+         message = messages.map(s => s.toString()).join(' ');
+         this.lib.teoLogPuts(ke.ksn_cfg, "" , level, message);
      },
 
     /**
