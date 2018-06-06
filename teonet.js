@@ -1236,7 +1236,7 @@ module.exports = {
      },
      
      teoLogPuts: function(ke, level, messages) {
-         message = messages.map(s => s.toString()).join(' ');
+         const message = messages.map(s => s.toString()).join(' ');
          this.lib.teoLogPuts(ke.ksn_cfg, "" , level, message);
      },
 
