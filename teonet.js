@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2016 Kirill Scherba <kirill@scherba.ru>.
+ * Copyright 2016-2018 Kirill Scherba <kirill@scherba.ru>.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -492,7 +492,9 @@ module.exports = {
          * @param data_len 0
          * @param user_data NULL
          */
-        EV_A_INTERVAL: 27
+        EV_A_INTERVAL: 27,
+        
+        EV_K_LOGGING: 28   ///< #28 Logging server event, like EV_K_RECEIVED: data Pointer to ksnCorePacketData, data_len Size of ksnCorePacketData, user_data NULL
 
     },
 
@@ -1235,12 +1237,12 @@ module.exports = {
          this.lib.teoSScrSubscribe(ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr, peer, ev);
      },
      
-     teoLogPuts: function(ke, level, messages) {
+     teoLogPuts: function(ke, level, module, messages) {
          const message = messages.map(s => { 
              if(s && s.toString) return s.toString();
              else return "log unparsed";
          }).join(' ');
-         this.lib.teoLogPuts(ke.ksn_cfg['ref.buffer'], "" , level, message);
+         this.lib.teoLogPuts(ke.ksn_cfg['ref.buffer'], module, level, message);
      },
 
     /**
