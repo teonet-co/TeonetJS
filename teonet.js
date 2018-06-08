@@ -1237,7 +1237,7 @@ module.exports = {
          this.lib.teoSScrSubscribe(ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr, peer, ev);
      },
      
-     teoLogPuts: function(ke, level, module, messages) {
+     teoLogPuts: function(ke, module, level, messages) {
          const message = messages.map(s => { 
              if(s && s.toString) return s.toString();
              else return "log unparsed";
