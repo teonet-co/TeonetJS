@@ -327,7 +327,8 @@ var ksnCQueClass = StructType({
 
     ke: ksnetEvMgrClassPtr,     ///< Pointer to ksnEvMgrClass
     id: 'uint32',               ///< New callback queue ID
-    cque_map: 'pointer'         ///< Pointer to the callback queue pblMap
+    cque_map: 'pointer',        ///< Pointer to the callback queue pblMap
+    event_f: 'uint8'            ///< Send cque event if true
 
 });
 var ksnCQueClassPtr = ref.refType(ksnCQueClass);
@@ -472,6 +473,8 @@ module.exports = {
          * User press A hotkey
          */
         EV_K_USER: 11,
+        
+        EV_K_ASYNC: 12,         ///< #12 Async event
 
         // \todo Fill next events
 
@@ -780,7 +783,10 @@ module.exports = {
         'teoSScrSubscribe': ['void', ['pointer', 'string', 'uint16']],
         
         // teoLogPuts(ksnet_cfg *ksn_cfg, const char* module , int type, const char* message);
-        'teoLogPuts': ['int', ['pointer', 'string' , 'int', 'string']]
+        'teoLogPuts': ['int', ['pointer', 'string' , 'int', 'string']],
+        
+        // void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data)
+        'ksnetEvMgrAsync': ['void', ['pointer', 'pointer', 'int', 'pointer']]
     }),
 
     /**
@@ -878,10 +884,12 @@ module.exports = {
         var retavl;
 
         if (rd.l0_f) {
-            retavl = this.lib.ksnLNullSendToL0(ke.ksn_cfg.ke, rd.addr, rd.port, rd.from, rd.from_len, cmd, out_data, out_data_length);
+            retavl = this.lib.ksnLNullSendToL0(ke.ksn_cfg.ke, rd.addr, rd.port, 
+                rd.from, rd.from_len, cmd, out_data, out_data_length);
         }
         else {
-            retavl = this.lib.ksnCoreSendto(ke.kc, rd.addr, rd.port, cmd, out_data, out_data_length);
+            retavl = this.lib.ksnCoreSendto(ke.kc, rd.addr, rd.port, cmd, 
+                out_data, out_data_length);
         }
 
         return retavl;
@@ -1233,17 +1241,23 @@ module.exports = {
         this.sendCmdToBinary(ke, peer_name, 130, req, req_length.readUInt32LE(0)); // req_length.readUInt64LE(0)
      },
      
-     subscribe: function(ke, peer, ev) {
-         this.lib.teoSScrSubscribe(ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr, peer, ev);
-     },
+    subscribe: function(ke, peer, ev) {
+        this.lib.teoSScrSubscribe(ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr, peer, ev);
+    },
      
-     teoLogPuts: function(ke, module, level, messages) {
-         const message = messages.map(s => { 
-             if(s && s.toString) return s.toString();
-             else return "log unparsed";
-         }).join(' ');
-         this.lib.teoLogPuts(ke.ksn_cfg['ref.buffer'], module, level, message);
-     },
+    teoLogPuts: function(ke, module, level, messages) {
+        const message = messages.map(s => { 
+            if(s && s.toString) return s.toString();
+            else return "log unparsed";
+        }).join(' ');
+        this.lib.teoLogPuts(ke.ksn_cfg['ref.buffer'], module, level, message);
+    },
+     
+    teoAsyncEvent: function(ke, data, data_length, user_data) {
+        //var buf = Buffer.from(data);
+        //if(!data_length) buf = Buffer.concat([buf, Buffer.from('\0')], buf.length + 1 );        
+        this.lib.ksnetEvMgrAsync(ke, data, data_length, user_data);
+    },
 
     /**
      * Get object for logging to syslog
