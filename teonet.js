@@ -922,8 +922,9 @@ module.exports = {
      *
      * @returns {'int'|'pointer'}
      */
-    sendCmdAnswerTo: function (ke, rd, cmd, out_data) {
-        return this.sendCmdAnswerToBinary(ke, rd, cmd, out_data, getLength(out_data));
+    sendCmdAnswerTo: function (ke, rd, cmd, data) {
+        let buf = Buffer.from(data + "\0");
+        return this.sendCmdAnswerToBinary(ke, rd, cmd, Buffer.from(data), buf.length);
     },
 
     /**
@@ -988,7 +989,8 @@ module.exports = {
      * @return {'pointer'} Pointer to ksnetArpData (ksnet_arp_data) or null if "to" peer is absent
      */
     sendCmdTo: function (ke, peer_name, cmd, data) {
-        return this.sendCmdToBinary(ke, peer_name, cmd, Buffer.from(data), getLength(data));
+        let buf = Buffer.from(data + "\0");
+        return this.sendCmdToBinary(ke, peer_name, cmd, buf, buf.length);
     },
 
 
@@ -1137,10 +1139,12 @@ module.exports = {
                                 // Parse buffer: { f_type, cmd, peer_length, peer, data }
                                 const peer_length = data[2];
                                 const peer = data.slice(3, peer_length + 3);
-                                const d = data.slice(peer_length + 3);
-                                const d_length = data_length - (peer_length + 3);
+                                //const d_length = data_length - (peer_length + 3);
+                                const d = data.slice(peer_length + 3, data_length);
 
-                                self.lib.ksnCoreSendCmdto(ke.kc, peer, cmd, d, d_length);
+                                //console.log("JS", d_length, d.toString());
+
+                                self.lib.ksnCoreSendCmdto(ke.kc, peer, cmd, d, d.length);
                                 processed = 1;
 
                             } break;
