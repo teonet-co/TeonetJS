@@ -473,7 +473,7 @@ module.exports = {
          * User press A hotkey
          */
         EV_K_USER: 11,
-        
+
         EV_K_ASYNC: 12,         ///< #12 Async event
 
         // \todo Fill next events
@@ -496,7 +496,7 @@ module.exports = {
          * @param user_data NULL
          */
         EV_A_INTERVAL: 27,
-        
+
         EV_K_LOGGING: 28   ///< #28 Logging server event, like EV_K_RECEIVED: data Pointer to ksnCorePacketData, data_len Size of ksnCorePacketData, user_data NULL
 
     },
@@ -779,12 +779,12 @@ module.exports = {
          * @return Result packet, should be free after use
          */
         'prepare_request_data': ['pointer', ['string', 'size_t', 'string', 'size_t', 'uint32', sizePtr]],
-        
+
         'teoSScrSubscribe': ['void', ['pointer', 'string', 'uint16']],
-        
+
         // teoLogPuts(ksnet_cfg *ksn_cfg, const char* module , int type, const char* message);
         'teoLogPuts': ['int', ['pointer', 'string' , 'int', 'string']],
-        
+
         // void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data)
         'ksnetEvMgrAsync': ['void', ['pointer', 'pointer', 'int', 'pointer']]
     }),
@@ -869,8 +869,25 @@ module.exports = {
         this.lib.ksnetEvMgrSetCustomTimer(ke, time_interval);
     },
 
+    sendCmdAnswerToBinary: function (ke, rd, cmd, data, data_length) {
+
+        const f_type = 3;
+
+        // Create buffer: { f_type, cmd, l0_f, addr_length, from_length, addr, from, port, data }
+        const b_cmd = Buffer.from([f_type, cmd, rd.l0_f, rd.addr.length + 1, rd.from_len]);
+        const b_addr = Buffer.from(rd.addr + "\0");
+        const b_from = Buffer.from(rd.from, rd.from_len);
+        const b_port = Buffer.alloc(4); b_port.writeUInt32LE(rd.port, 0);
+
+        const buf = Buffer.concat([b_cmd, b_addr, b_from, b_port, data],
+            b_cmd.length + b_addr.length + b_from.length + b_port.length + data_length);
+
+        this.teoAsyncEvent(ke.ksn_cfg.ke, buf, buf.length, null);
+        return 0;
+    },
+
     /**
-     * Send request answer data (binary) to Peer or L0 server client (
+     * Send request answer data (binary) to Peer or L0 server client (DIRECT)
      *
      * @param {'pointer'} ke Pointer to ksnetEvMgrClass
      * @param {'pointer'|object} rd Pointer to ksnCorePacketData
@@ -879,16 +896,16 @@ module.exports = {
      * @param {'int'} out_data Output data length
      * @returns {'int'|'pointer'}
      */
-    sendCmdAnswerToBinary: function (ke, rd, cmd, out_data, out_data_length) {
+    sendCmdAnswerToBinaryD: function (ke, rd, cmd, out_data, out_data_length) {
 
         var retavl;
 
         if (rd.l0_f) {
-            retavl = this.lib.ksnLNullSendToL0(ke.ksn_cfg.ke, rd.addr, rd.port, 
+            retavl = this.lib.ksnLNullSendToL0(ke.ksn_cfg.ke, rd.addr, rd.port,
                 rd.from, rd.from_len, cmd, out_data, out_data_length);
         }
         else {
-            retavl = this.lib.ksnCoreSendto(ke.kc, rd.addr, rd.port, cmd, 
+            retavl = this.lib.ksnCoreSendto(ke.kc, rd.addr, rd.port, cmd,
                 out_data, out_data_length);
         }
 
@@ -902,7 +919,7 @@ module.exports = {
      * @param {'pointer'|object} rd Pointer to ksnCorePacketData
      * @param {'uint8'} cmd Comand to send
      * @param {'string'} out_data Output data
-     * 
+     *
      * @returns {'int'|'pointer'}
      */
     sendCmdAnswerTo: function (ke, rd, cmd, out_data) {
@@ -920,17 +937,21 @@ module.exports = {
     },
 
     sendCmdToBinaryA: function (ke, peer, cmd, data, data_length) {
-        
+
         const f_type = 1;
-        
+
         // Create buffer: { f_type, cmd, peer_lengt, peer, data }
         const b_cmd = Buffer.from([f_type, cmd, peer.length + 1]);
         const b_peer = Buffer.from(peer + "\0");
-        const buf = Buffer.concat([b_cmd, b_peer, data], 
+        const buf = Buffer.concat([b_cmd, b_peer, data],
             b_cmd.length + b_peer.length + data_length);
-        
+
         this.teoAsyncEvent(ke.ksn_cfg.ke, buf, buf.length, null);
         return 0;
+    },
+
+    sendCmdToBinaryD: function (ke, peer_name, cmd, data, data_length) {
+        return this.lib.ksnCoreSendCmdto(ke.kc, peer_name, cmd, data, data_length);
     },
 
     /**
@@ -946,7 +967,14 @@ module.exports = {
      */
     sendCmdToBinary: function (ke, peer_name, cmd, data, data_length) {
         return this.sendCmdToBinaryA (ke, peer_name, cmd, data, data_length);
-        //return this.lib.ksnCoreSendCmdto(ke.kc, peer_name, cmd, data, data_length);
+    },
+
+    sendCmdToD: function (ke, peer_name, cmd, data) {
+        return this.lib.ksnCoreSendCmdto(ke.kc, peer_name, cmd, data, getLength(data));
+    },
+
+    sendCmdToA: function (ke, peer_name, cmd, data) {
+        return this.sendCmdToBinaryA(ke, peer_name, cmd, Buffer.from(data), getLength(data));
     },
     
     /**
@@ -961,10 +989,9 @@ module.exports = {
      */
     sendCmdTo: function (ke, peer_name, cmd, data) {
         return this.sendCmdToBinary(ke, peer_name, cmd, Buffer.from(data), getLength(data));
-        //return this.lib.ksnCoreSendCmdto(ke.kc, peer_name, cmd, data, getLength(data));
     },
 
-        
+
     /**
      * Send command to L0 client
      *
@@ -1096,44 +1123,94 @@ module.exports = {
                 if(typeof eventCb === 'function') {
                     let processed = 0;
                     if(ev === self.ev.EV_K_ASYNC && data !== null) {
-                        
+
                         // Parse buffer
                         const ke = ksnetEvMgrClass(ke_ptr);
                         const f_type = data[0];
                         const cmd = data[1];
 
                         switch(f_type) {
-                            
+
                             // sendCmdToBinaryA
                             case 1: {
-                                
+
                                 // Parse buffer: { f_type, cmd, peer_length, peer, data }
                                 const peer_length = data[2];
                                 const peer = data.slice(3, peer_length + 3);
                                 const d = data.slice(peer_length + 3);
                                 const d_length = data_length - (peer_length + 3);
-                                
+
                                 self.lib.ksnCoreSendCmdto(ke.kc, peer, cmd, d, d_length);
                                 processed = 1;
-                                
+
                             } break;
 
                             // sendToSscrA
                             case 2: {
-                                
+
                                 // Parse buffer: { f_type, cmd, event, data }
                                 const event = data[2];
                                 const d = data.slice(3);
-                                const d_length = data_length - 3;     
-                                
+                                const d_length = data_length - 3;
+
                                 self.lib.teoSScrSend(
                                     ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr,
                                     event, d, d_length, cmd || 0
                                 );
                                 processed = 1;
+
+                            } break;
+
+
+                            // sendCmdAnswerToBinaryA
+                            case 3: {
+
+                                let retval = 0;
+
+                                // Parse buffer: { f_type, cmd, l0_f, addr_length, from_length, addr, from, port, data }
+                                let ptr = 2;
+                                const l0_f = data[ptr]; ptr++;
+                                const addr_length = data[ptr]; ptr++;
+                                const from_length = data[ptr]; ptr++;
+                                const addr = data.slice(ptr, ptr + addr_length).toString(); ptr += addr_length; 
+                                const from = data.slice(ptr, ptr + from_length).toString(); ptr += from_length; 
+                                const port = data.slice(ptr, ptr + 4).readUInt32LE(0); ptr += 4;
+
+                                const d_length = data_length - ptr;
+                                const d = data.slice(ptr, ptr + d_length);
                                 
+//                                console.log("sendCmdAnswerToBinaryA", cmd, l0_f, addr_length, from_length, addr, port, from, from_length, d.toString(), d_length);
+//                                self.stop(ke.ksn_cfg.ke);
+//                                return;
+
+                                if (l0_f) {
+                                    retval = self.lib.ksnLNullSendToL0(ke.ksn_cfg.ke, addr, port,
+                                        from, from_length, cmd, d, d_length);
+                                }
+                                else {
+                                    retval = self.lib.ksnCoreSendto(ke.kc, addr, port, cmd,
+                                        d, d_length);
+                                }
+
                             } break;
                             
+                            // subscribeA
+                            case 4: {
+                                    
+                                // Parse buffer: { f_type, cmd, peer_length, ev, peer }
+                                let ptr = 2;
+                                const peer_length = data[ptr]; ptr++;
+                                const ev = data.slice(ptr, ptr + 2).readUInt16LE(0); ptr += 2;
+                                const peer = data.slice(ptr, ptr + peer_length).toString();
+                                
+//                                console.log("subscribeA", cmd, peer_length, peer, ev);
+//                                self.stop(ke.ksn_cfg.ke);
+//                                return;
+                                
+                                self.lib.teoSScrSubscribe(ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr, peer, ev);
+
+                                } break;
+
                             default:
                                 break;
                         }
@@ -1183,10 +1260,10 @@ module.exports = {
 
         // Start teonet
         return self.lib.ksnetEvMgrRun.async(ke, function (err, res) {
-            
+
             if (err) {
                 //throw err;
-                console.error("Error: " + err);                
+                console.error("Error: " + err);
             }
             else console.log("Teonet exited, result: " + res);
 
@@ -1248,20 +1325,29 @@ module.exports = {
     },
 
     sendToSscrA: function (ke, event, data, data_length, cmd) {
-        
+
         const f_type = 2;
-    
+
         // If data_length skipped than it's a string
         var d = Buffer.from(data);
         if(!data_length) d = Buffer.concat([d, Buffer.from('\0')], d.length + 1 );
-        
+
         // Create buffer: { f_type, cmd, event, data }
         const b_cmd = Buffer.from([f_type, cmd, event]);
-        const buf = Buffer.concat([b_cmd, d], 
+        const buf = Buffer.concat([b_cmd, d],
             b_cmd.length + d.length);
-        
+
         this.teoAsyncEvent(ke.ksn_cfg.ke, buf, buf.length, null);
         return 0;
+    },
+    
+    sendToSscrD: function(ke, event, data, data_length, cmd) {
+        var buf = Buffer.from(data);
+        if(!data_length) buf = Buffer.concat([buf, Buffer.from('\0')], buf.length + 1 );
+        this.lib.teoSScrSend(
+            ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr,
+            event, buf, buf.length, cmd || 0
+        );
     },    
 
     /**
@@ -1275,15 +1361,32 @@ module.exports = {
      * @return {undefined}
      */
     sendToSscr: function(ke, event, data, data_length, cmd) {
-        //var buf = Buffer.from(data);
-        //if(!data_length) buf = Buffer.concat([buf, Buffer.from('\0')], buf.length + 1 );
-        //this.lib.teoSScrSend(
-        //    ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr,
-        //    event, buf, buf.length, cmd || 0
-        //);
         this.sendToSscrA(ke, event, data, data_length, cmd);
     },
     
+    subscribeD: function(ke, peer, ev) {
+        this.lib.teoSScrSubscribe(ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr, peer, ev);
+    },    
+
+    subscribeA: function(ke, peer, ev) {
+        
+        const f_type = 4;
+
+        // Create buffer: { f_type, cmd, peer_length, ev, peer }
+        const b_cmd = Buffer.from([f_type, 0, peer.length + 1]);
+        const b_event = Buffer.alloc(2); b_event.writeUInt16LE(ev, 0);
+        const b_peer = Buffer.from(peer + "\0", peer.length + 1);
+        
+        const buf = Buffer.concat([b_cmd, b_event, b_peer],
+            b_cmd.length + b_event.length + b_peer.length);
+            
+        this.teoAsyncEvent(ke.ksn_cfg.ke, buf, buf.length, null);
+    },    
+    
+    subscribe: function(ke, peer, ev) {
+        this.subscribeA(ke, peer, ev);
+    },
+
     /**
      * Send CMD_SET = 129 to teodb app
      *
@@ -1319,20 +1422,16 @@ module.exports = {
             /*getLength(data)*/0, id, req_length);
         this.sendCmdToBinary(ke, peer_name, 130, req, req_length.readUInt32LE(0)); // req_length.readUInt64LE(0)
      },
-     
-    subscribe: function(ke, peer, ev) {
-        this.lib.teoSScrSubscribe(ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr, peer, ev);
-    },
-     
+
     teoLogPuts: function(ke, module, level, messages) {
-        const message = messages.map(s => { 
+        const message = messages.map(s => {
             if(s && s.toString) return s.toString();
             else return "log unparsed";
         }).join(' ');
         this.lib.teoLogPuts(ke.ksn_cfg['ref.buffer'], module, level, message);
     },
-     
-    teoAsyncEvent: function(ke, data, data_length, user_data) {     
+
+    teoAsyncEvent: function(ke, data, data_length, user_data) {
         this.lib.ksnetEvMgrAsync(ke, data, data_length, user_data);
     },
 
