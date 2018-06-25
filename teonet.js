@@ -367,6 +367,10 @@ function getLength(data) {
     return data ? data.length + 1 : 0;
 }
 
+function addZero(str) {
+  if(!str.endsWith("\0")) return str + "\0";
+  return str;
+}
 
 //module.exports = ffi.Library('/home/kirill/Projects/teonet/src/.libs/libteonet', {
 module.exports = {
@@ -874,13 +878,15 @@ module.exports = {
         const f_type = 3;
 
         // Create buffer: { f_type, cmd, l0_f, addr_length, from_length, addr, from, port, data }
-        const b_cmd = Buffer.from([f_type, cmd, rd.l0_f, rd.addr.length + 1, rd.from_len]);
-        const b_addr = Buffer.from(rd.addr + "\0");
-        const b_from = Buffer.from(rd.from, rd.from_len);
+        const b_addr = Buffer.from(addZero(rd.addr));
+        const b_from = Buffer.from(addZero(rd.from));
         const b_port = Buffer.alloc(4); b_port.writeUInt32LE(rd.port, 0);
+        const b_cmd = Buffer.from([f_type, cmd, rd.l0_f, b_addr.length, b_from.length]);
 
         const buf = Buffer.concat([b_cmd, b_addr, b_from, b_port, data],
-            b_cmd.length + b_addr.length + b_from.length + b_port.length + data_length);
+            b_cmd.length + b_addr.length + b_from.length + b_port.length + data_length);            
+            
+        //console.log(rd.from, rd.from_len, b_port, b_port.readUInt32LE(0), b_from.toString(), b_from.length);
 
         this.teoAsyncEvent(ke.ksn_cfg.ke, buf, buf.length, null);
         return 0;
@@ -923,8 +929,8 @@ module.exports = {
      * @returns {'int'|'pointer'}
      */
     sendCmdAnswerTo: function (ke, rd, cmd, data) {
-        let buf = Buffer.from(data + "\0");
-        return this.sendCmdAnswerToBinary(ke, rd, cmd, Buffer.from(data), buf.length);
+        let buf = Buffer.from(addZero(data));
+        return this.sendCmdAnswerToBinary(ke, rd, cmd, buf, buf.length);
     },
 
     /**
@@ -942,11 +948,13 @@ module.exports = {
         const f_type = 1;
 
         // Create buffer: { f_type, cmd, peer_lengt, peer, data }
-        const b_cmd = Buffer.from([f_type, cmd, peer.length + 1]);
-        const b_peer = Buffer.from(peer + "\0");
+        const b_peer = Buffer.from(addZero(peer));
+        const b_cmd = Buffer.from([f_type, cmd, b_peer.length]);
         const buf = Buffer.concat([b_cmd, b_peer, data],
             b_cmd.length + b_peer.length + data_length);
 
+        console.log(data.toString());
+        
         this.teoAsyncEvent(ke.ksn_cfg.ke, buf, buf.length, null);
         return 0;
     },
@@ -989,7 +997,7 @@ module.exports = {
      * @return {'pointer'} Pointer to ksnetArpData (ksnet_arp_data) or null if "to" peer is absent
      */
     sendCmdTo: function (ke, peer_name, cmd, data) {
-        let buf = Buffer.from(data + "\0");
+        let buf = Buffer.from(addZero(data));
         return this.sendCmdToBinary(ke, peer_name, cmd, buf, buf.length);
     },
 
@@ -1110,7 +1118,7 @@ module.exports = {
     cqueSetData: function (ke, id, data) {
         return this.lib.ksnCQueSetData(ke.kq, id, data);
     },
-
+    
     /**
      * Convert javascript callback to C library callback
      *
@@ -1121,10 +1129,15 @@ module.exports = {
         const self = this;
         var cb = ffi.Callback('void', [ksnetEvMgrClassPtr, 'int', ksnCorePacketDataPtr, 'size_t', 'pointer'],
             //eventCb
-            function (ke_ptr, ev, data, data_length, u_data) {
+            function (ke_ptr, ev, d, data_length, u_data) {
                 if(typeof eventCb === 'function') {
                     let processed = 0;
-                    if(ev === self.ev.EV_K_ASYNC && data !== null) {
+                    if(ev === self.ev.EV_K_ASYNC && d !== null) {
+                                                                        
+                        //const rd = new self.packetDataPointer(d);
+                        let data = d.deref();
+                        data = d; //self.packetDataPointer(d);
+                        console.log("EV_K_ASYNC:", data.toString(), data_length, data.length);
 
                         // Parse buffer
                         const ke = ksnetEvMgrClass(ke_ptr);
@@ -1137,12 +1150,12 @@ module.exports = {
                             case 1: {
 
                                 // Parse buffer: { f_type, cmd, peer_length, peer, data }
-                                const peer_length = data[2];
-                                const peer = data.slice(3, peer_length + 3);
-                                //const d_length = data_length - (peer_length + 3);
-                                const d = data.slice(peer_length + 3, data_length);
-
-                                //console.log("JS", d_length, d.toString());
+                                let ptr = 2;
+                                const peer_length = data[ptr]; ptr++;
+                                const peer = data.slice(ptr, peer_length + ptr); ptr = peer_length + ptr;
+                                const d = data.slice(ptr, data_length);
+                                
+                                console.log("case 1:", d.toString(), data_length, data.length);
 
                                 self.lib.ksnCoreSendCmdto(ke.kc, peer, cmd, d, d.length);
                                 processed = 1;
@@ -1153,13 +1166,14 @@ module.exports = {
                             case 2: {
 
                                 // Parse buffer: { f_type, cmd, event, data }
-                                const event = data[2];
-                                const d = data.slice(3);
-                                const d_length = data_length - 3;
+                                let ptr = 2;
+                                const event = data[ptr]; ptr++;
+                                const d = data.slice(ptr); ptr++;
+                                //const d_length = data_length - ptr - 1;
 
                                 self.lib.teoSScrSend(
                                     ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr,
-                                    event, d, d_length, cmd || 0
+                                    event, d, d.length, cmd || 0
                                 );
                                 processed = 1;
 
@@ -1177,13 +1191,13 @@ module.exports = {
                                 const addr_length = data[ptr]; ptr++;
                                 const from_length = data[ptr]; ptr++;
                                 const addr = data.slice(ptr, ptr + addr_length).toString(); ptr += addr_length; 
-                                const from = data.slice(ptr, ptr + from_length).toString(); ptr += from_length; 
+                                const from = data.slice(ptr, ptr + from_length - 1).toString(); ptr += from_length; 
                                 const port = data.slice(ptr, ptr + 4).readUInt32LE(0); ptr += 4;
 
                                 const d_length = data_length - ptr;
                                 const d = data.slice(ptr, ptr + d_length);
                                 
-//                                console.log("sendCmdAnswerToBinaryA", cmd, l0_f, addr_length, from_length, addr, port, from, from_length, d.toString(), d_length);
+//                                console.log("sendCmdAnswerToBinaryA", cmd, l0_f, addr_length, from_length, addr, from, port, from_length, d.toString(), d_length);
 //                                self.stop(ke.ksn_cfg.ke);
 //                                return;
 
@@ -1195,6 +1209,8 @@ module.exports = {
                                     retval = self.lib.ksnCoreSendto(ke.kc, addr, port, cmd,
                                         d, d_length);
                                 }
+                                
+                                processed = 1;
 
                             } break;
                             
@@ -1219,7 +1235,7 @@ module.exports = {
                                 break;
                         }
                     }
-                    if(!processed) eventCb(ksnetEvMgrClass(ke_ptr), ev, data, data_length, u_data);
+                    if(!processed) eventCb(ksnetEvMgrClass(ke_ptr), ev, d, data_length, u_data);
                 }
             }
         );
@@ -1334,12 +1350,11 @@ module.exports = {
 
         // If data_length skipped than it's a string
         var d = Buffer.from(data);
-        if(!data_length) d = Buffer.concat([d, Buffer.from('\0')], d.length + 1 );
+        if(!data_length) d = Buffer.concat([d, Buffer.from("\0")], d.length + 1 );
 
         // Create buffer: { f_type, cmd, event, data }
         const b_cmd = Buffer.from([f_type, cmd, event]);
-        const buf = Buffer.concat([b_cmd, d],
-            b_cmd.length + d.length);
+        const buf = Buffer.concat([b_cmd, d], b_cmd.length + d.length);
 
         this.teoAsyncEvent(ke.ksn_cfg.ke, buf, buf.length, null);
         return 0;

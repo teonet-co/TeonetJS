@@ -1,6 +1,6 @@
 {
   "name": "teonet",
-  "version": "0.0.77",
+  "version": "0.0.80",
   "description": "Teonet server nodejs module",
   "homepage": "https://github.com/teonet-co/TeonetJS",
   "main": "teonet.js",
