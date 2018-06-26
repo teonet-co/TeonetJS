@@ -372,6 +372,7 @@ function addZero(str) {
   return str;
 }
 
+
 //module.exports = ffi.Library('/home/kirill/Projects/teonet/src/.libs/libteonet', {
 module.exports = {
 
@@ -953,7 +954,7 @@ module.exports = {
         const buf = Buffer.concat([b_cmd, b_peer, data],
             b_cmd.length + b_peer.length + data_length);
 
-        console.log(data.toString());
+        //console.log("sendCmdToBinaryA",data.toString());
         
         this.teoAsyncEvent(ke.ksn_cfg.ke, buf, buf.length, null);
         return 0;
@@ -1133,16 +1134,18 @@ module.exports = {
                 if(typeof eventCb === 'function') {
                     let processed = 0;
                     if(ev === self.ev.EV_K_ASYNC && d !== null) {
-                                                                        
+                                            
+                        
                         //const rd = new self.packetDataPointer(d);
-                        let data = d.deref();
-                        data = d; //self.packetDataPointer(d);
-                        console.log("EV_K_ASYNC:", data.toString(), data_length, data.length);
+                        let data = ref.reinterpret(d, data_length, 0);//d.deref();
+                        //data = d; //self.packetDataPointer(d);
+                        //console.log("EV_K_ASYNC:", data.toString(), data_length, data.length);
 
                         // Parse buffer
                         const ke = ksnetEvMgrClass(ke_ptr);
                         const f_type = data[0];
                         const cmd = data[1];
+                        let ptr = 2;
 
                         switch(f_type) {
 
@@ -1150,12 +1153,11 @@ module.exports = {
                             case 1: {
 
                                 // Parse buffer: { f_type, cmd, peer_length, peer, data }
-                                let ptr = 2;
                                 const peer_length = data[ptr]; ptr++;
                                 const peer = data.slice(ptr, peer_length + ptr); ptr = peer_length + ptr;
                                 const d = data.slice(ptr, data_length);
                                 
-                                console.log("case 1:", d.toString(), data_length, data.length);
+                                //console.log("case 1:", d.toString(), data_length, data.length, peer.toString(), peer_length, "\n");
 
                                 self.lib.ksnCoreSendCmdto(ke.kc, peer, cmd, d, d.length);
                                 processed = 1;
@@ -1166,11 +1168,12 @@ module.exports = {
                             case 2: {
 
                                 // Parse buffer: { f_type, cmd, event, data }
-                                let ptr = 2;
-                                const event = data[ptr]; ptr++;
+                                const event = data.slice(ptr, ptr + 2).readUInt16LE(0); ptr += 2;
                                 const d = data.slice(ptr); ptr++;
                                 //const d_length = data_length - ptr - 1;
 
+                                //console.log("case 2:", event, d.toString(), d.length, cmd);
+                                
                                 self.lib.teoSScrSend(
                                     ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr,
                                     event, d, d.length, cmd || 0
@@ -1186,7 +1189,6 @@ module.exports = {
                                 let retval = 0;
 
                                 // Parse buffer: { f_type, cmd, l0_f, addr_length, from_length, addr, from, port, data }
-                                let ptr = 2;
                                 const l0_f = data[ptr]; ptr++;
                                 const addr_length = data[ptr]; ptr++;
                                 const from_length = data[ptr]; ptr++;
@@ -1218,12 +1220,11 @@ module.exports = {
                             case 4: {
                                     
                                 // Parse buffer: { f_type, cmd, peer_length, ev, peer }
-                                let ptr = 2;
                                 const peer_length = data[ptr]; ptr++;
                                 const ev = data.slice(ptr, ptr + 2).readUInt16LE(0); ptr += 2;
                                 const peer = data.slice(ptr, ptr + peer_length).toString();
                                 
-//                                console.log("subscribeA", cmd, peer_length, peer, ev);
+                                //console.log("case 4:", cmd, peer_length, peer, ev, "\n");
 //                                self.stop(ke.ksn_cfg.ke);
 //                                return;
                                 
@@ -1352,10 +1353,12 @@ module.exports = {
         var d = Buffer.from(data);
         if(!data_length) d = Buffer.concat([d, Buffer.from("\0")], d.length + 1 );
 
-        // Create buffer: { f_type, cmd, event, data }
-        const b_cmd = Buffer.from([f_type, cmd, event]);
-        const buf = Buffer.concat([b_cmd, d], b_cmd.length + d.length);
+        // Create buffer: { f_type, cmd, event, data }        
+        const b_cmd = Buffer.from([f_type, cmd]);
+        const b_event = Buffer.alloc(2); b_event.writeUInt16LE(event, 0);
+        const buf = Buffer.concat([b_cmd, b_event, d], b_cmd.length + b_event.length + d.length);
 
+        //console.log('sendToSscrA:', cmd, event, d.toString(), buf.toString(), buf.length);
         this.teoAsyncEvent(ke.ksn_cfg.ke, buf, buf.length, null);
         return 0;
     },
@@ -1398,6 +1401,8 @@ module.exports = {
         
         const buf = Buffer.concat([b_cmd, b_event, b_peer],
             b_cmd.length + b_event.length + b_peer.length);
+            
+        //console.log("subscribeA:", buf.toString(), ev);
             
         this.teoAsyncEvent(ke.ksn_cfg.ke, buf, buf.length, null);
     },    
