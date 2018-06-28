@@ -640,6 +640,8 @@ module.exports = {
          * @return {'pointer'} Pointer to ksnet_arp_data or null if "to" peer is absent
          */
         'ksnCoreSendCmdto': ['pointer', ['pointer', 'string', 'uint8', 'string', 'size_t']],
+        
+        'sendCmdToBinaryA': ['pointer', ['pointer', 'string', 'uint8', 'pointer', 'size_t']],
 
         // ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_ECHO_ANSWER,
         //          rd->data, rd->data_len);
@@ -946,6 +948,9 @@ module.exports = {
 
     sendCmdToBinaryA: function (ke, peer, cmd, data, data_length) {
 
+        this.lib.sendCmdToBinaryA(ke.ksn_cfg.ke, peer, cmd, data, data_length);
+        return 0;
+
         const f_type = 1;
 
         // Create buffer: { f_type, cmd, peer_lengt, peer, data }
@@ -956,7 +961,7 @@ module.exports = {
 
         //console.log("sendCmdToBinaryA",data.toString());
         
-        this.teoAsyncEvent(ke.ksn_cfg.ke, buf, buf.length, null);
+        this.teoAsyncEvent(ke.ksn_cfg.ke, buf, buf.length, null);        
         return 0;
     },
 
