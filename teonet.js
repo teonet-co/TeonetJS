@@ -884,7 +884,7 @@ module.exports = {
 
     sendCmdAnswerToBinary: function (ke, rd, cmd, data, data_length) {
         var rdp = new ksnCorePacketData({ addr:rd.addr, port:rd.port, cmd:rd.cmd, l0_f:rd.l0_f, from:rd.from, from_len:rd.from_len });
-        return this.lib.sendCmdAnswerToBinaryA(ke.ksn_cfg.ke, rdp.ref(), rd.cmd, data, data_length);
+        return this.lib.sendCmdAnswerToBinaryA(ke.ksn_cfg.ke, rdp.ref(), cmd, data, data_length);
 
 //        const f_type = 3;
 //
@@ -955,7 +955,6 @@ module.exports = {
     },
 
     sendCmdToBinaryA: function (ke, peer, cmd, data, data_length) {
-        
         return this.lib.ksnCoreSendCmdtoA(ke.ksn_cfg.ke, peer, cmd, data, data_length);
 
 //        const f_type = 1;
@@ -1361,7 +1360,7 @@ module.exports = {
         var buf = Buffer.from(data);
         if(!data_length) buf = Buffer.concat([buf, Buffer.from('\0')], buf.length + 1 );
         this.lib.teoSScrSendA(
-            ksnCommandClass(ksnCoreClass(ke.kc).kco).ksscr,
+            ke.ksn_cfg.ke,
             event, buf, buf.length, cmd || 0
         );
         return 0;
