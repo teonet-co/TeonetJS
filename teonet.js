@@ -368,7 +368,7 @@ function getLength(data) {
 }
 
 function addZero(str) {
-  if(!str.endsWith("\0")) return str + "\0";
+  if(str !== null && !str.endsWith("\0")) return str + "\0";
   return str;
 }
 
@@ -940,8 +940,11 @@ module.exports = {
      * @returns {'int'|'pointer'}
      */
     sendCmdAnswerTo: function (ke, rd, cmd, data) {
-        let buf = Buffer.from(addZero(data));
-        return this.sendCmdAnswerToBinary(ke, rd, cmd, buf, buf.length);
+        if(data !== null) {
+            let buf = Buffer.from(addZero(data));
+            return this.sendCmdAnswerToBinary(ke, rd, cmd, buf, buf.length);
+        }
+        else return this.sendCmdAnswerToBinary(ke, rd, cmd, null, 0);
     },
 
     /**
